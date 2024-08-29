@@ -28,13 +28,13 @@ const VideoCard = ({ attributes, handleClick }) => {
     setPopupOpen(true);
   };
 
-  useEffect(() => {
-    if (open && reference == popupReference.current) {
-      popupReference.current.classList.add(styles.active);
-    } else {
-      popupReference.current.classList.remove(styles.active);
-    }
-  }, [open, reference]);
+  // useEffect(() => {
+  //   if (open && reference == popupReference.current) {
+  //     popupReference.current.classList.add(styles.active);
+  //   } else {
+  //     popupReference.current.classList.remove(styles.active);
+  //   }
+  // }, [open, reference]);
 
   // preview
   const previewOpen = PreviewStore.useState((s) => s.open);
@@ -117,14 +117,14 @@ const VideoCard = ({ attributes, handleClick }) => {
                   >
                     <h3>{attributes.title}</h3>
                   </div>
-                  <div className={styles.popup_button} ref={popupReference}>
-                    <IonIcon
-                      icon={ellipsisVertical}
-                      slot="start"
-                      className={styles.icon}
-                      onClick={(e) => handlePopup(e)}
-                    />
-                  </div>
+                  {/*<div className={styles.popup_button} ref={popupReference}>*/}
+                  {/*  <IonIcon*/}
+                  {/*    icon={ellipsisVertical}*/}
+                  {/*    slot="start"*/}
+                  {/*    className={styles.icon}*/}
+                  {/*    onClick={(e) => handlePopup(e)}*/}
+                  {/*  />*/}
+                  {/*</div>*/}
                 </div>
 
                 <div className={styles.metadata}>

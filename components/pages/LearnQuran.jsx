@@ -1,4 +1,5 @@
 import styles from "./Home.module.css";
+import withChipbarStyles from "./QuranTranslations.module.css";
 import classNames from "classnames";
 import { UIStore, setPreviewContainer } from "../../store";
 import { youtube, constants, server } from "../../lib/config";
@@ -16,10 +17,8 @@ import Loader from "../utils/Loader";
 import useOnScreen from "../../hooks/useOnScreen";
 import PlayerModal from "./modal/PlayerModal";
 import Meta from "../core/Meta";
-import { FixedSizeList as List } from "react-window";
-import otherStyles from "./QuranTranslations.module.css";
 
-const getUrl = (pagination) => {
+const getUrl = (pagination, activeSubCat) => {
   let page = pagination.page ? pagination.page : 1;
   if (Object.keys(pagination).length !== 0) {
     if (pagination.page < pagination.pageCount) {
@@ -29,10 +28,14 @@ const getUrl = (pagination) => {
 
   console.log("page: " + page);
 
-  return `https://dbe.alquranarabia.com/api/contents?pagination[page]=${page}&pagination[pageSize]=${constants.DEFAULT_PAGE_LIMIT}&sort[0]=contentPublishedAt:desc&fields[0]=id&fields[1]=ytVideoId&fields[2]=slug&fields[3]=title&fields[4]=contentPublishedAt&filters[sourceType][$eq]=YouTube&filters[dataContentType][$eq]=Quran Learning&filters[status][$eq]=Approved`;
+  return `https://dbe.alquranarabia.com/api/contents?pagination[page]=${page}&pagination[pageSize]=${
+      constants.DEFAULT_PAGE_LIMIT
+  }&sort[0]=contentPublishedAt:desc&fields[0]=id&fields[1]=ytVideoId&fields[2]=slug&fields[3]=title&fields[4]=contentPublishedAt&fields[5]=sourceLogoUrl&filters[sourceType][$eq]=YouTube&filters[dataContentType][$eq]=Quran Learning${
+      activeSubCat ? `&filters[localizationId][$eq]=${activeSubCat}` : ""
+  }`;
 };
 
-const LearnQuran = () => {
+const QuranTranslations = () => {
   const isMini = UIStore.useState((s) => s.isMiniNav);
 
   const ref = useRef();
@@ -44,9 +47,30 @@ const LearnQuran = () => {
     videos: [],
   });
 
-  useEffect(() => {
-    const url = getUrl(data.pagination);
+  const [locales, setLocales] = useState([]);
+  const [activeSubCat, setActiveSubCat] = useState();
 
+  const subCatClickHandler = (id) => {
+    console.log(id);
+    setActiveSubCat(id);
+  };
+
+  useEffect(() => {
+    const url = `https://dbe.alquranarabia.com/api/localizations?pagination[page]=1&pagination[pageSize]=100&sort[0]=name:asc&fields[0]=id&fields[1]=name`;
+
+    const fetchData = async () => {
+      const res = await fetch(url);
+      const locales = await res.json();
+      setLocales(locales.data);
+    };
+
+    fetchData().catch(console.error);
+  }, []);
+
+  // fetch video on first load
+  useEffect(() => {
+    const url = getUrl({}, activeSubCat);
+    console.log(url);
     const fetchData = async () => {
       const res = await getVideosDataByUrl(url);
       setData({
@@ -57,18 +81,18 @@ const LearnQuran = () => {
     };
 
     fetchData().catch(console.error);
-  }, []);
+  }, [activeSubCat]);
   console.log(data);
 
   useEffect(() => {
     if (
-      isVisible &&
-      !isLoadingMore &&
-      data.pagination.page < data.pagination.pageCount
+        isVisible &&
+        !isLoadingMore &&
+        data.pagination.page < data.pagination.pageCount
     ) {
       setIsloadingMore(true);
 
-      const url = getUrl(data.pagination);
+      const url = getUrl(data.pagination, activeSubCat);
 
       const fetchData = async () => {
         const res = await getVideosDataByUrl(url);
@@ -79,7 +103,7 @@ const LearnQuran = () => {
         };
 
         setData(newData);
-        // setIsloadingMore(false);
+        setIsloadingMore(false);
       };
 
       fetchData().catch(console.error);
@@ -115,82 +139,57 @@ const LearnQuran = () => {
     openModal();
   };
 
-  const Cell = ({ columnIndex, rowIndex, data }) => (
-    <div className={otherStyles.Cell} key={rowIndex}>
-      <VideoCard
-        handleClick={handleClick}
-        attributes={data[rowIndex].attributes}
-      />
-    </div>
-  );
-
-  const Item = ({ index, style, data }) => (
-    <div className={otherStyles.Cell} key={index}>
-      <VideoCard
-        handleClick={handleClick}
-        attributes={data[index].attributes}
-      />
-    </div>
-  );
-
   return (
-    <>
-      <Meta
-        title="Learn Quran"
-        description="Quran.Tube"
-        url={server}
-        image={`${server}/img/logo/default_share.png`}
-        type="website"
-      />
+      <>
+        <Meta
+            title="Quran Translations"
+            description="Quran.Tube"
+            url={server}
+            image={`${server}/img/logo/default_share.png`}
+            type="website"
+        />
 
-      <PlayerModal
-        open={modalOpen}
-        closer={handleModalClose}
-        src={videoId}
-        videoDetail={videoDetail}
-      />
+        <PlayerModal
+            open={modalOpen}
+            closer={handleModalClose}
+            src={videoId}
+            videoDetail={videoDetail}
+        />
 
-      <div className={styles.wrapper}>
-        {/*<div*/}
-        {/*  className={classNames(*/}
-        {/*    styles.header,*/}
-        {/*    isMini ? styles.mini : "",*/}
-        {/*    "chipbar"*/}
-        {/*  )}*/}
-        {/*>*/}
-        {/*  <ChipBar />*/}
-        {/*</div>*/}
+        <div className={styles.wrapper}>
+          <div
+              className={classNames(
+                  styles.header,
+                  isMini ? styles.mini : "",
+                  "chipbar"
+              )}
+          >
+            <ChipBar
+                locales={locales}
+                activeId={activeSubCat}
+                subCatClickHandler={subCatClickHandler}
+            />
+          </div>
 
-        <div className={styles.container}>
-          <div className={styles.content} ref={containerRef}>
-            {/* {data.videos.map((video, index) => (
-              <div className={styles.item} key={index}>
-                <VideoCard
-                  handleClick={handleClick}
-                  attributes={video.attributes}
-                />
+          <div className={`${styles.container} ${withChipbarStyles.withChipbar}`}>
+            <div className={styles.content} ref={containerRef}>
+              {data.videos.map((video, index) => (
+                  <div className={styles.item} key={index}>
+                    <VideoCard
+                        handleClick={handleClick}
+                        attributes={video.attributes}
+                    />
+                  </div>
+              ))}
+
+              <div ref={ref} className={styles.loader}>
+                {isLoadingMore && <Loader />}
               </div>
-            ))} */}
-
-            <List
-              height={500}
-              itemCount={data.videos.length}
-              itemSize={35}
-              width="100%"
-              itemData={data.videos}
-              className={otherStyles.Grid}
-            >
-              {Item}
-            </List>
-
-            <div ref={ref} className={styles.loader}>
-              {isLoadingMore && <Loader />}
             </div>
           </div>
         </div>
-      </div>
-    </>
+      </>
   );
 };
 
-export default LearnQuran;
+export default QuranTranslations;

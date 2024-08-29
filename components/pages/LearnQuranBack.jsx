@@ -14,16 +14,12 @@ import VideoCard from "../cards/Video";
 import ChipBar from "../ui/ChipBar";
 import Loader from "../utils/Loader";
 import useOnScreen from "../../hooks/useOnScreen";
-import Previewer from "../utils/Previewer";
 import PlayerModal from "./modal/PlayerModal";
 import Meta from "../core/Meta";
+import { FixedSizeList as List } from "react-window";
+import otherStyles from "./QuranTranslations.module.css";
 
 const getUrl = (pagination) => {
-  // let pageToken = "";
-  // if (previousPageData !== null && previousPageData.nextPageToken !== null) {
-  //   pageToken = `&pageToken=${previousPageData.nextPageToken}`;
-  // }
-
   let page = pagination.page ? pagination.page : 1;
   if (Object.keys(pagination).length !== 0) {
     if (pagination.page < pagination.pageCount) {
@@ -32,12 +28,11 @@ const getUrl = (pagination) => {
   }
 
   console.log("page: " + page);
-  return `https://dbe.alquranarabia.com/api/contents?pagination[page]=${page}&pagination[pageSize]=${constants.DEFAULT_PAGE_LIMIT}&sort[0]=contentPublishedAt:desc&fields[0]=id&fields[1]=ytVideoId&fields[2]=slug&fields[3]=title&fields[4]=contentPublishedAt&fields[5]=sourceLogoUrl&filters[sourceType][$eq]=YouTube&filters[dataContentType][$eq]=Quran Arabic&filters[dataContentType][$eq]=Quran Translation&filters[dataContentType][$eq]=Quran Learning`;
 
-  // return `${youtube.url}/playlistItems?key=${youtube.key}&part=snippet&playlistId=${playlistId}&maxResults=${constants.DEFAULT_PAGE_LIMIT}${pageToken}`;
+  return `https://dbe.alquranarabia.com/api/contents?pagination[page]=${page}&pagination[pageSize]=${constants.DEFAULT_PAGE_LIMIT}&sort[0]=contentPublishedAt:desc&fields[0]=id&fields[1]=ytVideoId&fields[2]=slug&fields[3]=title&fields[4]=contentPublishedAt&filters[sourceType][$eq]=YouTube&filters[dataContentType][$eq]=Quran Learning&filters[status][$eq]=Approved`;
 };
 
-const Home = () => {
+const LearnQuran = () => {
   const isMini = UIStore.useState((s) => s.isMiniNav);
 
   const ref = useRef();
@@ -84,7 +79,7 @@ const Home = () => {
         };
 
         setData(newData);
-        setIsloadingMore(false);
+        // setIsloadingMore(false);
       };
 
       fetchData().catch(console.error);
@@ -120,17 +115,34 @@ const Home = () => {
     openModal();
   };
 
+  const Cell = ({ columnIndex, rowIndex, data }) => (
+    <div className={otherStyles.Cell} key={rowIndex}>
+      <VideoCard
+        handleClick={handleClick}
+        attributes={data[rowIndex].attributes}
+      />
+    </div>
+  );
+
+  const Item = ({ index, style, data }) => (
+    <div className={otherStyles.Cell} key={index}>
+      <VideoCard
+        handleClick={handleClick}
+        attributes={data[index].attributes}
+      />
+    </div>
+  );
+
   return (
     <>
       <Meta
-        title=""
-        description="Quran.Tube Homepage"
+        title="Learn Quran"
+        description="Quran.Tube"
         url={server}
         image={`${server}/img/logo/default_share.png`}
         type="website"
       />
 
-      {/* <Previewer /> */}
       <PlayerModal
         open={modalOpen}
         closer={handleModalClose}
@@ -151,16 +163,25 @@ const Home = () => {
 
         <div className={styles.container}>
           <div className={styles.content} ref={containerRef}>
-            {data.videos.map((video, index) => (
+            {/* {data.videos.map((video, index) => (
               <div className={styles.item} key={index}>
                 <VideoCard
                   handleClick={handleClick}
                   attributes={video.attributes}
-                  // statistics={data.videoStats}
-                  // channelThumbnails={data.channels}
                 />
               </div>
-            ))}
+            ))} */}
+
+            <List
+              height={500}
+              itemCount={data.videos.length}
+              itemSize={35}
+              width="100%"
+              itemData={data.videos}
+              className={otherStyles.Grid}
+            >
+              {Item}
+            </List>
 
             <div ref={ref} className={styles.loader}>
               {isLoadingMore && <Loader />}
@@ -172,4 +193,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default LearnQuran;

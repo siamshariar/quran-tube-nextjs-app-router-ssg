@@ -23,6 +23,8 @@ import {
   settingsOutline,
   captivePortal,
   historyEdu,
+  radioIcon,
+  forestIcon,
 } from "../../icons";
 import MenuClickModal from "../pages/modal/MenuClickModal";
 
@@ -40,42 +42,42 @@ const pages1 = [
     url: "/quran-translations",
   },
   {
-    title: "Salah Recitations",
-    icon: library,
-    iconOutline: libraryOutline,
-    url: "/subscriptions",
-    inProgress: true,
-  },
-  {
     title: "Learn Quran",
     icon: historyEdu,
     iconOutline: historyEdu,
     url: "/learn-quran",
   },
   {
-    title: "Learn Quran Virtuoso",
-    icon: historyEdu,
-    iconOutline: historyEdu,
-    url: "/learn-quran-virtuoso",
-  },
-  {
-    title: "Recitations in Makkah",
+    title: "Salah Recitations",
     icon: library,
     iconOutline: libraryOutline,
     url: "/subscriptions",
     inProgress: true,
   },
-  {
-    title: "Recitations in Madinah",
-    icon: library,
-    iconOutline: libraryOutline,
-    url: "/subscriptions",
-    inProgress: true,
-  },
+  // {
+  //   title: "Learn Quran Virtuoso",
+  //   icon: historyEdu,
+  //   iconOutline: historyEdu,
+  //   url: "/learn-quran-virtuoso",
+  // },
+  // {
+  //   title: "Recitations in Makkah",
+  //   icon: library,
+  //   iconOutline: libraryOutline,
+  //   url: "/subscriptions",
+  //   inProgress: true,
+  // },
+  // {
+  //   title: "Recitations in Madinah",
+  //   icon: library,
+  //   iconOutline: libraryOutline,
+  //   url: "/subscriptions",
+  //   inProgress: true,
+  // },
   {
     title: "Quran with Nature",
     icon: library,
-    iconOutline: libraryOutline,
+    iconOutline: forestIcon,
     url: "/subscriptions",
     inProgress: true,
   },
@@ -85,16 +87,16 @@ const pages2 = [
   {
     title: "Quran.radio",
     icon: library,
-    iconOutline: libraryOutline,
-    url: "/library",
-    inProgress: true,
+    iconOutline: radioIcon,
+    url: "https://www.quran.radio",
+    inProgress: false,
   },
   {
     title: "DeeniTube",
     icon: library,
     iconOutline: libraryOutline,
-    url: "/history",
-    inProgress: true,
+    url: "https://www.deeniinfotech.com/develop-islamic-applications",
+    inProgress: false,
   },
 ];
 
@@ -135,8 +137,8 @@ const Nav = () => {
           {/*<MenuList pages={pages2} openModal={openModal} />*/}
           {/*<hr className={styles.divider} />*/}
 
-          <MenuList pages={pages3} openModal={openModal} />
-          <hr className={styles.divider} />
+          {/*<MenuList pages={pages3} openModal={openModal} />*/}
+          {/*<hr className={styles.divider} />*/}
 
           <div className={styles.title}>More Apps</div>
 

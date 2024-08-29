@@ -82,7 +82,8 @@
 }
 .meta {
   overflow: hidden;
-  width: calc(100% - 48px);
+  /*width: calc(100% - 48px);*/
+  width: 100%;
 }
 .meta_top {
   display: flex;
@@ -92,7 +93,8 @@
 }
 .title {
   display: block;
-  width: calc(100% - 40px);
+  /*width: calc(100% - 40px);*/
+  width: 100%;
 }
 .title h3 {
   font-family: "Roboto", "Arial", sans-serif;
@@ -149,8 +151,8 @@
 .bottom span:nth-child(1) {
 }
 .bottom span:nth-child(1)::after {
-  content: "•";
-  margin: 0 4px;
+  /*content: "•";*/
+  /*margin: 0 4px;*/
 }
 
 @media screen and (min-width: 392px) {
