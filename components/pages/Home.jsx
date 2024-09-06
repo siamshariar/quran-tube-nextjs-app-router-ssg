@@ -63,7 +63,7 @@ const Home = () => {
 
     fetchData().catch(console.error);
   }, []);
-  console.log(data);
+  // console.log(data);
 
   useEffect(() => {
     if (
@@ -89,8 +89,8 @@ const Home = () => {
 
       fetchData().catch(console.error);
     }
-  }, [isVisible, isLoadingMore]);
-  console.log("isVisible: " + isVisible, isLoadingMore);
+  }, [isVisible]);
+  console.log("isVisible: " + isVisible, "isLoadinMore: " + isLoadingMore);
 
   const containerRef = useRef(null);
 

@@ -29,13 +29,13 @@ const getUrl = (pagination, activeSubCat) => {
   console.log("page: " + page);
 
   return `https://dbe.alquranarabia.com/api/contents?pagination[page]=${page}&pagination[pageSize]=${
-      constants.DEFAULT_PAGE_LIMIT
+    constants.DEFAULT_PAGE_LIMIT
   }&sort[0]=contentPublishedAt:desc&fields[0]=id&fields[1]=ytVideoId&fields[2]=slug&fields[3]=title&fields[4]=contentPublishedAt&fields[5]=sourceLogoUrl&filters[sourceType][$eq]=YouTube&filters[dataContentType][$eq]=Quran Learning${
-      activeSubCat ? `&filters[localizationId][$eq]=${activeSubCat}` : ""
+    activeSubCat ? `&filters[localizationId][$eq]=${activeSubCat}` : ""
   }`;
 };
 
-const QuranTranslations = () => {
+const LearnQuran = () => {
   const isMini = UIStore.useState((s) => s.isMiniNav);
 
   const ref = useRef();
@@ -86,9 +86,9 @@ const QuranTranslations = () => {
 
   useEffect(() => {
     if (
-        isVisible &&
-        !isLoadingMore &&
-        data.pagination.page < data.pagination.pageCount
+      isVisible &&
+      !isLoadingMore &&
+      data.pagination.page < data.pagination.pageCount
     ) {
       setIsloadingMore(true);
 
@@ -108,7 +108,7 @@ const QuranTranslations = () => {
 
       fetchData().catch(console.error);
     }
-  }, [isVisible, isLoadingMore]);
+  }, [isVisible]);
   console.log("isVisible: " + isVisible, isLoadingMore);
 
   const containerRef = useRef(null);
@@ -140,56 +140,56 @@ const QuranTranslations = () => {
   };
 
   return (
-      <>
-        <Meta
-            title="Quran Translations"
-            description="Quran.Tube"
-            url={server}
-            image={`${server}/img/logo/default_share.png`}
-            type="website"
-        />
+    <>
+      <Meta
+        title="Quran Translations"
+        description="Quran.Tube"
+        url={server}
+        image={`${server}/img/logo/default_share.png`}
+        type="website"
+      />
 
-        <PlayerModal
-            open={modalOpen}
-            closer={handleModalClose}
-            src={videoId}
-            videoDetail={videoDetail}
-        />
+      <PlayerModal
+        open={modalOpen}
+        closer={handleModalClose}
+        src={videoId}
+        videoDetail={videoDetail}
+      />
 
-        <div className={styles.wrapper}>
-          <div
-              className={classNames(
-                  styles.header,
-                  isMini ? styles.mini : "",
-                  "chipbar"
-              )}
-          >
-            <ChipBar
-                locales={locales}
-                activeId={activeSubCat}
-                subCatClickHandler={subCatClickHandler}
-            />
-          </div>
+      <div className={styles.wrapper}>
+        <div
+          className={classNames(
+            styles.header,
+            isMini ? styles.mini : "",
+            "chipbar"
+          )}
+        >
+          <ChipBar
+            locales={locales}
+            activeId={activeSubCat}
+            subCatClickHandler={subCatClickHandler}
+          />
+        </div>
 
-          <div className={`${styles.container} ${withChipbarStyles.withChipbar}`}>
-            <div className={styles.content} ref={containerRef}>
-              {data.videos.map((video, index) => (
-                  <div className={styles.item} key={index}>
-                    <VideoCard
-                        handleClick={handleClick}
-                        attributes={video.attributes}
-                    />
-                  </div>
-              ))}
-
-              <div ref={ref} className={styles.loader}>
-                {isLoadingMore && <Loader />}
+        <div className={`${styles.container} ${withChipbarStyles.withChipbar}`}>
+          <div className={styles.content} ref={containerRef}>
+            {data.videos.map((video, index) => (
+              <div className={styles.item} key={index}>
+                <VideoCard
+                  handleClick={handleClick}
+                  attributes={video.attributes}
+                />
               </div>
+            ))}
+
+            <div ref={ref} className={styles.loader}>
+              {isLoadingMore && <Loader />}
             </div>
           </div>
         </div>
-      </>
+      </div>
+    </>
   );
 };
 
-export default QuranTranslations;
+export default LearnQuran;

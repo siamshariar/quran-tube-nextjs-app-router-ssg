@@ -70,7 +70,6 @@ const QuranTranslations = () => {
   // fetch video on first load
   useEffect(() => {
     const url = getUrl({}, activeSubCat);
-    console.log(url);
     const fetchData = async () => {
       const res = await getVideosDataByUrl(url);
       setData({
@@ -108,7 +107,7 @@ const QuranTranslations = () => {
 
       fetchData().catch(console.error);
     }
-  }, [isVisible, isLoadingMore]);
+  }, [isVisible]);
   console.log("isVisible: " + isVisible, isLoadingMore);
 
   const containerRef = useRef(null);
