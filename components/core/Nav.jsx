@@ -34,52 +34,49 @@ const pages1 = [
     icon: home,
     iconOutline: homeOutline,
     url: "/",
+    linkType: "internal",
   },
   {
     title: "Quran Translations",
     icon: captivePortal,
     iconOutline: captivePortal,
     url: "/quran-translations",
+    linkType: "internal",
   },
   {
     title: "Learn Quran",
     icon: historyEdu,
     iconOutline: historyEdu,
     url: "/learn-quran",
+    linkType: "internal",
   },
   {
     title: "Salah Recitations",
     icon: library,
     iconOutline: libraryOutline,
     url: "/subscriptions",
-    inProgress: true,
+    linkType: "inProgress",
   },
-  // {
-  //   title: "Learn Quran Virtuoso",
-  //   icon: historyEdu,
-  //   iconOutline: historyEdu,
-  //   url: "/learn-quran-virtuoso",
-  // },
   // {
   //   title: "Recitations in Makkah",
   //   icon: library,
   //   iconOutline: libraryOutline,
   //   url: "/subscriptions",
-  //   inProgress: true,
+  // linkType: "internal"
   // },
   // {
   //   title: "Recitations in Madinah",
   //   icon: library,
   //   iconOutline: libraryOutline,
   //   url: "/subscriptions",
-  //   inProgress: true,
+  // linkType: "internal"
   // },
   {
     title: "Quran with Nature",
     icon: library,
     iconOutline: forestIcon,
     url: "/subscriptions",
-    inProgress: true,
+    linkType: "inProgress",
   },
 ];
 
@@ -89,14 +86,14 @@ const pages2 = [
     icon: library,
     iconOutline: radioIcon,
     url: "https://www.quran.radio",
-    inProgress: false,
+    linkType: "external",
   },
   {
     title: "DeeniTube",
     icon: library,
     iconOutline: libraryOutline,
     url: "https://www.deeniinfotech.com/develop-islamic-applications",
-    inProgress: false,
+    linkType: "external",
   },
 ];
 
@@ -106,14 +103,14 @@ const pages3 = [
     icon: settingsOutline,
     iconOutline: settingsOutline,
     url: "/settings",
-    inProgress: true,
+    linkType: "inProgress",
   },
   {
     title: "Library",
     icon: library,
     iconOutline: libraryOutline,
     url: "/library",
-    inProgress: true,
+    linkType: "inProgress",
   },
 ];
 
@@ -188,37 +185,16 @@ const MenuList = ({ pages, openModal }) => {
 
   return (
     <div className={styles.list}>
-      {pages.map((p, i) =>
-        p.inProgress ? (
-          <div
-            key={i}
-            className={classNames(
-              styles.item,
-              p.url === path ? styles.active : ""
-            )}
-            onClick={openModal}
-          >
-            <IonIcon
-              icon={p.url === path ? p.icon : p.iconOutline}
-              slot="start"
-              className={styles.icon}
-            />
-            <IonLabel className={styles.label}>{p.title}</IonLabel>
-          </div>
-        ) : (
-          <IonRouterLink
-            routerLink={p.url}
-            routerDirection="none"
-            detail={false}
-            lines="none"
-            key={i}
-          >
+      {pages.map((p, i) => (
+        <>
+          {p.linkType == "inProgress" && (
             <div
               key={i}
               className={classNames(
                 styles.item,
                 p.url === path ? styles.active : ""
               )}
+              onClick={openModal}
             >
               <IonIcon
                 icon={p.url === path ? p.icon : p.iconOutline}
@@ -227,9 +203,45 @@ const MenuList = ({ pages, openModal }) => {
               />
               <IonLabel className={styles.label}>{p.title}</IonLabel>
             </div>
-          </IonRouterLink>
-        )
-      )}
+          )}
+          {p.linkType == "internal" && (
+            <IonRouterLink
+              routerLink={p.url}
+              routerDirection="none"
+              detail={false}
+              lines="none"
+              key={i}
+            >
+              <div
+                key={i}
+                className={classNames(
+                  styles.item,
+                  p.url === path ? styles.active : ""
+                )}
+              >
+                <IonIcon
+                  icon={p.url === path ? p.icon : p.iconOutline}
+                  slot="start"
+                  className={styles.icon}
+                />
+                <IonLabel className={styles.label}>{p.title}</IonLabel>
+              </div>
+            </IonRouterLink>
+          )}
+          {p.linkType == "external" && (
+            <a href={p.url} target="_blank" rel="noreferrer">
+              <div key={i} className={classNames(styles.item)}>
+                <IonIcon
+                  icon={p.iconOutline}
+                  slot="start"
+                  className={styles.icon}
+                />
+                <IonLabel className={styles.label}>{p.title}</IonLabel>
+              </div>
+            </a>
+          )}
+        </>
+      ))}
     </div>
   );
 };

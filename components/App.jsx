@@ -17,6 +17,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import QuranTranslations from "./pages/QuranTranslations";
 import LearnQuran from "./pages/LearnQuran";
 import LearnQuranVirtuoso from "./pages/LearnQuranVirtuoso";
+import More from "./pages/More";
 
 window
   .matchMedia("(prefers-color-scheme: dark)")
@@ -80,6 +81,7 @@ const App = () => {
                 )}
               />
               <Route path="/privacy-policy" exact component={PrivacyPolicy} />
+              <Route path="/more" exact component={More} />
             </IonRouterOutlet>
           </Layout>
         </IonSplitPane>
