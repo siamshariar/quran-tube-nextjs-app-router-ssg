@@ -16,7 +16,6 @@ import ChannelAbout from "./pages/channels/About";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import QuranTranslations from "./pages/QuranTranslations";
 import LearnQuran from "./pages/LearnQuran";
-import LearnQuranVirtuoso from "./pages/LearnQuranVirtuoso";
 import More from "./pages/More";
 
 window
@@ -43,11 +42,6 @@ const App = () => {
                 render={() => <QuranTranslations />}
               />
               <Route exact path="/learn-quran" render={() => <LearnQuran />} />
-              <Route
-                exact
-                path="/learn-quran-virtuoso"
-                render={() => <LearnQuranVirtuoso />}
-              />
               <Route exact path="/watch/:id" component={Watch} />
               <Route exact path="/search" component={Search} />
               <Route exact path="/channels" component={Channels} />
