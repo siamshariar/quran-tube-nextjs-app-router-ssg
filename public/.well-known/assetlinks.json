@@ -3,10 +3,10 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.deeniinfotech.quran.radio",
+      "package_name": "com.deeniinfotech.qurantube",
       "sha256_cert_fingerprints": [
-        "12:A9:C8:03:AA:C7:29:A1:A7:02:CF:99:07:8F:BA:CF:5E:30:22:68:E1:E9:4B:E9:4E:76:5B:3D:A7:D5:83:D9",
-        "F4:E5:3F:51:9E:ED:53:A3:CD:7F:51:39:0B:97:30:57:1D:A8:14:BA:DF:E4:99:F4:2D:C8:15:48:24:CB:20:95"
+        "C7:D6:55:B1:7E:64:DC:BC:4A:35:90:EB:E4:94:29:4F:58:79:BE:9C:FE:D8:C6:90:7A:A7:06:56:10:97:3E:9A",
+        "03:23:9B:A6:2E:8C:7D:0D:22:EF:5B:38:FA:5B:1A:AD:AB:79:66:99:9C:26:AF:6C:A3:E6:AE:E7:B8:75:50:46"
       ]
     }
   }

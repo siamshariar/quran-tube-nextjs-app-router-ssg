@@ -174,13 +174,13 @@ const Header = ({ controller }) => {
           {/*    className={styles.icon}*/}
           {/*  />*/}
           {/*</button>*/}
-          <button className={styles.btn}>
-            <IonIcon
-              icon={appsOutline} //
-              slot="start"
-              className={styles.icon}
-            />
-          </button>
+          {/*<button className={styles.btn}>*/}
+          {/*  <IonIcon*/}
+          {/*    icon={appsOutline} //*/}
+          {/*    slot="start"*/}
+          {/*    className={styles.icon}*/}
+          {/*  />*/}
+          {/*</button>*/}
         </div>
       </div>
       {/* mobile search */}
