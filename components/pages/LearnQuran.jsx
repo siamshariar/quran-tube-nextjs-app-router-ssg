@@ -30,7 +30,7 @@ const getUrl = (pagination, activeSubCat) => {
 
   return `https://dbe.alquranarabia.com/api/contents?pagination[page]=${page}&pagination[pageSize]=${
     constants.DEFAULT_PAGE_LIMIT
-  }&sort[0]=contentPublishedAt:desc&fields[0]=id&fields[1]=ytVideoId&fields[2]=slug&fields[3]=title&fields[4]=contentPublishedAt&fields[5]=sourceLogoUrl&filters[sourceType][$eq]=YouTube&filters[dataContentType][$eq]=Quran Learning${
+  }&sort[0]=contentPublishedAt:desc&fields[0]=id&fields[1]=ytVideoId&fields[2]=slug&fields[3]=title&fields[4]=contentPublishedAt&fields[5]=sourceLogoUrl&filters[status][$eq]=Approved&filters[sourceType][$eq]=YouTube&filters[dataContentType][$eq]=Quran Learning${
     activeSubCat ? `&filters[localizationId][$eq]=${activeSubCat}` : ""
   }`;
 };
@@ -174,19 +174,22 @@ const LearnQuran = () => {
         <div className={`${styles.container} ${withChipbarStyles.withChipbar}`}>
           <div className={styles.content} ref={containerRef}>
             {data.videos.map((video, index) => (
-              <div className={styles.item} key={index}>
-                <VideoCard
-                  handleClick={handleClick}
-                  attributes={video.attributes}
-                />
-              </div>
+                <div className={styles.item} key={index}>
+                  <VideoCard handleClick={handleClick} attributes={video.attributes} />
+                </div>
             ))}
 
+            {!isLoadingMore && data.videos.length < 1 && (
+                <p className={styles.tmpMsg}>
+                  No content available for selected translation language!
+                </p>
+            )}
             <div ref={ref} className={styles.loader}>
               {isLoadingMore && <Loader />}
             </div>
           </div>
         </div>
+
       </div>
     </>
   );

@@ -78,3 +78,9 @@
     padding: 0 8px;
   }
 }
+
+.tmpMsg {
+  padding: 0px 10px;
+  font-size: 18px;
+  text-align: center;
+}

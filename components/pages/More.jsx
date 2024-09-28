@@ -13,8 +13,8 @@ const More = () => {
       />
       <div>
         <p className={styles.tmpMsg}>
-          Feature development is in progress and will be added soon, In'Sha
-          Allah.
+          {/* eslint-disable-next-line react/no-unescaped-entities */}
+          Feature development is in progress and will be added soon, In'ShaAllah.
         </p>
       </div>
     </>
