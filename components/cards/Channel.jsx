@@ -4,6 +4,8 @@ import { server } from "../../lib/config";
 import { format } from "../../lib/format";
 import { IonRouterLink, IonIcon } from "@ionic/react";
 import { ellipsisVertical } from "../../icons";
+import { Image } from "next/image";
+
 import { useRef, useEffect, useState } from "react";
 import {
   PopupStore,
@@ -93,12 +95,14 @@ const ChannelCard = ({
       >
         <div className={styles.content}>
           <div className={styles.profile}>
-            <img
-              src={
-                avatar ? avatar : `${server}/img/youtube/youtube-default.jpg`
-              }
-              alt=""
-            />
+          <Image
+            unoptimized
+            src={avatar ? avatar : `${server}/img/youtube/youtube-default.jpg`}
+            alt="User Avatar"
+            width={50}  // Specify appropriate width
+            height={50} // Specify appropriate height
+            layout="fixed" // Optional: Choose layout based on the use case
+          />
           </div>
           <div className={styles.details}>
             <h2 className={styles.title}>{title}</h2>

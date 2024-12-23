@@ -1,6 +1,7 @@
 import styles from "./Watch.module.css";
 import classNames from "classnames";
 import { youtube, constants } from "../../lib/config";
+import Image from "next/image";
 import { format } from "../../lib/format";
 import {
   getYoutubeVideoDetailsByUrl,
@@ -252,9 +253,12 @@ const Watch = ({ match }) => {
                   rel="noreferrer"
                   className={styles.avatar}
                 >
-                  <img
-                    src={videoDetail ? videoDetail.channelAvatar : ""} //
-                    alt=""
+                  <Image
+                    unoptimized
+                    src={videoDetail?.channelAvatar || '/path/to/default/image.png'} // Use a default image in case channelAvatar is empty
+                    alt="Channel Avatar"
+                    width={50} // Specify the width you want
+                    height={50} // Specify the height you want
                   />
                 </a>
                 <a
@@ -353,11 +357,14 @@ const Comments = ({ comments }) => {
         comments.map((comment, index) => (
           <div className={styles.comments_item} key={index}>
             <div className={styles.comments_avatar}>
-              <img
+              <Image
+                unoptimized
                 src={
-                  comment.snippet.topLevelComment.snippet.authorProfileImageUrl
+                  comment.snippet.topLevelComment.snippet.authorProfileImageUrl || '/path/to/default/image.png'
                 }
-                alt=""
+                alt="Author's Profile Image"
+                width={50} 
+                height={50}
               />
             </div>
             <div className={styles.comments_detail}>

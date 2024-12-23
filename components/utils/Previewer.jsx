@@ -1,6 +1,7 @@
 import styles from "./Previewer.module.css";
 import classNames from "classnames";
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import {
   PreviewStore,
   setPreviewOpen,
@@ -159,13 +160,13 @@ const Previewer = () => {
               routerLink={`/watch/${video.id}`} //
               className={styles.avatar}
             >
-              <img
-                src={
-                  video.channelThumbnails
-                    ? video.channelThumbnails[video.channelId]
-                    : ""
-                } //
+              <Image
+                unoptimized
+                src={video.channelThumbnails ? video.channelThumbnails[video.channelId] : ""}
                 alt=""
+                width={100}  
+                height={100} 
+                layout="responsive" 
               />
             </IonRouterLink>
             <div className={styles.meta}>

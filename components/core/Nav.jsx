@@ -22,79 +22,102 @@ import {
   likeOutline,
   settingsOutline,
   captivePortal,
+  prayingIcon,
   historyEdu,
+  kaabaIcon,
+  madinahIcon,
+  ruqyahIcon,
+  shortsIcon,
   radioIcon,
   forestIcon,
+  quranRadio
 } from "../../icons";
+
 import MenuClickModal from "../pages/modal/MenuClickModal";
 
 const pages1 = [
   {
     title: "Home",
-    icon: home,
-    iconOutline: homeOutline,
+    icon: "/icons/home-icon.svg",
+    iconOutline: "/icons/home-icon.svg",
     url: "/",
     linkType: "internal",
   },
   {
-    title: "Quran Translations",
-    icon: captivePortal,
-    iconOutline: captivePortal,
+    title: "Shorts",
+    icon: "/icons/shorts-icon.svg",
+    iconOutline: "/icons/shorts-icon.svg",
+    url: "/shorts",
+    linkType: "internal",
+  },
+  {
+    title: "Ruqyah",
+    icon: "/icons/ruqya-icon.svg",
+    iconOutline: "/icons/ruqya-icon.svg",
+    url: "/ruqyah",
+    linkType: "internal",
+  },
+  {
+    title: "Translations",
+    icon: "/icons/translate-icon.svg",
+    iconOutline: "/icons/translate-icon.svg",
     url: "/quran-translations",
     linkType: "internal",
   },
   {
+    title: "Dua",
+    icon: "/icons/dua-icon.svg",
+    iconOutline: "/icons/dua-icon.svg",
+    url: "/dua",
+    linkType: "internal",
+  },
+  {
     title: "Learn Quran",
-    icon: historyEdu,
-    iconOutline: historyEdu,
+    icon: "/icons/learning-quran-icon.svg",
+    iconOutline: "/icons/learning-quran-icon.svg",
     url: "/learn-quran",
     linkType: "internal",
   },
   {
-    title: "Salah Recitations",
-    icon: library,
-    iconOutline: libraryOutline,
-    url: "/subscriptions",
-    linkType: "inProgress",
+    title: "Maqqa",
+    icon: "/icons/kaaba-icon.svg",
+    iconOutline: "/icons/kaaba-icon.svg",
+    url: "/maqqa",
+    linkType: "internal",
   },
-  // {
-  //   title: "Recitations in Makkah",
-  //   icon: library,
-  //   iconOutline: libraryOutline,
-  //   url: "/subscriptions",
-  // linkType: "internal"
-  // },
-  // {
-  //   title: "Recitations in Madinah",
-  //   icon: library,
-  //   iconOutline: libraryOutline,
-  //   url: "/subscriptions",
-  // linkType: "internal"
-  // },
   {
-    title: "Quran with Nature",
-    icon: library,
-    iconOutline: forestIcon,
-    url: "/subscriptions",
-    linkType: "inProgress",
+    title: "Madinah",
+    icon: "/icons/medina-icon.svg",
+    iconOutline: "/icons/medina-icon.svg",
+    url: "/madinah",
+    linkType: "internal",
   },
+  // {
+  //   title: "Quran with Nature",
+  //   icon: "/icons/quran-with-nature-icon.svg",
+  //   iconOutline: "/icons/quran-with-nature-icon.svg",
+  //   url: "/subscriptions",
+  //   linkType: "inProgress",
+  // },
+
+  
 ];
 
 const pages2 = [
   {
     title: "Quran.radio",
-    icon: library,
-    iconOutline: radioIcon,
-    url: "https://www.quran.radio",
+    icon: "/icons/quran-radio-icon.svg",
+    iconOutline: "/icons/quran-radio-icon.svg",
+    url: "https://www.deeniinfotech.com/p/quran-radio#apps",
     linkType: "external",
   },
-  {
-    title: "DeeniTube",
-    icon: library,
-    iconOutline: libraryOutline,
-    url: "https://www.deeniinfotech.com/develop-islamic-applications",
-    linkType: "external",
-  },
+  // {
+  //   title: "DeeniTube",
+  //   icon: "/icons/deeni-tube-icon.svg",
+  //   iconOutline: "/icons/deeni-tube-icon.svg",
+  //   url: "https://www.deeniinfotech.com/develop-islamic-applications",
+  //   linkType: "external",
+  // },
 ];
 
 const pages3 = [
@@ -137,10 +160,10 @@ const Nav = () => {
           {/*<MenuList pages={pages3} openModal={openModal} />*/}
           {/*<hr className={styles.divider} />*/}
 
-          <div className={styles.title}>More Apps</div>
+          <div className={styles.appstitle}>More Apps</div>
 
           <MenuList pages={pages2} openModal={openModal} />
-          <hr className={styles.divider} />
+          {/*<hr className={styles.divider} />*/}
         </div>
         <div className={styles.footer}>
           {/* <div className={styles.links}>
@@ -158,7 +181,8 @@ const Nav = () => {
               <a href="#">Privacy</a>
             </div> */}
           <p className={styles.copyright}>
-            &copy; 2024{" "}
+            {/*&copy; 2024{" "}*/}
+            Powered By - {" "}
             <a
               target="_blank"
               rel="noreferrer"
@@ -229,8 +253,8 @@ const MenuList = ({ pages, openModal }) => {
             </IonRouterLink>
           )}
           {p.linkType == "external" && (
-            <a href={p.url} target="_blank" rel="noreferrer">
-              <div key={i} className={classNames(styles.item)}>
+            <a key={i} href={p.url} target="_blank" rel="noreferrer">
+              <div className={classNames(styles.item)}>
                 <IonIcon
                   icon={p.iconOutline}
                   slot="start"

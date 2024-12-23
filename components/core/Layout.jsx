@@ -22,6 +22,14 @@ const Layout = ({ children }) => {
   const [path, setPath] = useState("/");
   const [type, setType] = useState(null);
 
+  const pathname = window.location.pathname;
+  // Scroll to top on path change
+  useEffect(() => {
+    if (container.current) {
+      container.current.scrollTop = 0; // Scroll the container to the top
+    }
+  }, [pathname]);
+
   useEffect(() => {
     setPath(location.pathname);
   }, [location]);
@@ -31,9 +39,10 @@ const Layout = ({ children }) => {
       setType("type1");
     } else if (path.match("/watch")) {
       setType("type2");
-    } else if (path.match("/search")) {
-      setType("type3");
     }
+    // else if (path.match("/search")) {
+    //   setType("type3");
+    // }
     // console.log(path);
   }, [path]);
 

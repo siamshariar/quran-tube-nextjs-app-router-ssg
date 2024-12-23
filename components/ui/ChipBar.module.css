@@ -37,9 +37,9 @@
   align-items: center;
   justify-content: center;
 }
-.item:last-child {
-  margin-right: 0;
-}
+/*.item:last-child {*/
+/*  margin-right: 0;*/
+/*}*/
 .item.mobile {
   border-radius: 0;
   border: none;
@@ -157,7 +157,7 @@
     cursor: pointer;
   }
   .btn .icon {
-    font-size: 16px;
+    font-size: 24px;
     color: #030303;
   }
 }

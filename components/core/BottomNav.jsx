@@ -21,23 +21,30 @@ import MenuClickModal from "../pages/modal/MenuClickModal";
 const pages = [
   {
     title: "Home",
-    icon: home,
-    iconOutline: homeOutline,
+    icon: "/icons/home-icon.svg",
+    iconOutline: "/icons/home-icon.svg",
     url: "/",
     linkType: "internal",
   },
   {
-    title: "Translations",
-    icon: captivePortal,
-    iconOutline: captivePortal,
-    url: "/quran-translations",
+    title: "Shorts",
+    icon: "/icons/shorts-icon.svg",
+    iconOutline: "/icons/shorts-icon.svg",
+    url: "/shorts",
     linkType: "internal",
   },
   {
-    title: "Learn Quran",
-    icon: historyEdu,
-    iconOutline: historyEdu,
-    url: "/learn-quran",
+    title: "Ruqyah",
+    icon: "/icons/ruqya-icon.svg",
+    iconOutline: "/icons/ruqya-icon.svg",
+    url: "/ruqyah",
+    linkType: "internal",
+  },
+  {
+    title: "Translations",
+    icon: "/icons/translate-icon.svg",
+    iconOutline: "/icons/translate-icon.svg",
+    url: "/quran-translations",
     linkType: "internal",
   },
   {
@@ -119,7 +126,14 @@ const BottomNav = () => {
                 key={i}
                 className={styles.item}
               >
-                <div className={styles.inner}>
+                <div
+                    className={classNames(
+                        styles.inner,
+                        p.url === "/"
+                            ? (p.url === path || path.includes("home") ? styles.active : "")
+                            : (p.url === path ? styles.active : "")
+                    )}
+                >
                   <IonIcon
                     icon={p.url === path ? p.icon : p.iconOutline}
                     slot="start"

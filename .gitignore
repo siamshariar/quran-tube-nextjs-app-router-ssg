@@ -82,3 +82,5 @@ Thumbs.db
 # source
 /idea
 /source
+
+.env
