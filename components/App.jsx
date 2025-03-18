@@ -14,12 +14,15 @@ import Dua from "./pages/Dua";
 import More from "./pages/More";
 import Ruqyah from "./pages/Ruqyah";
 import Maqqa from "./pages/Maqqa";
+import Taraweeh from "./pages/Taraweeh";
 import Madinah from "./pages/Madinah";
 import Shorts from "./pages/Shorts";
 import React, { useEffect } from "react";
 import {isMobile, isTablet} from 'react-device-detect';
 import { useRouter } from "next/router";
 import TestPage from "./pages/TestPage";
+import TaraweehMaqqa from "./pages/TaraweehMaqqa";
+import TaraweehMadinah from "./pages/TaraweehMadinah";
 
 window
   .matchMedia("(prefers-color-scheme: dark)")
@@ -107,6 +110,11 @@ const App = () => {
               <Route exact path="/maqqa" render={() => <Maqqa />} />
               <Route exact path="/madinah" render={() => <Madinah />} />
               <Route exact path="/shorts" render={() => <Shorts />} />
+
+              <Route exact path="/taraweeh" render={() => <Taraweeh />} />
+              <Route exact path="/taraweeh-maqqa" render={() => <TaraweehMaqqa />} />
+              <Route exact path="/taraweeh-madinah" render={() => <TaraweehMadinah />} />
+
               <Route exact path="/search" component={Search} />
 
               <Route path="/privacy-policy" exact component={PrivacyPolicy} />

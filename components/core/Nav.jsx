@@ -51,6 +51,13 @@ const pages1 = [
     linkType: "internal",
   },
   {
+    title: "Taraweeh",
+    icon: "/icons/taraweeh.svg",
+    iconOutline: "/icons/taraweeh.svg",
+    url: "/taraweeh",
+    linkType: "internal",
+  },
+  {
     title: "Ruqyah",
     icon: "/icons/ruqya-icon.svg",
     iconOutline: "/icons/ruqya-icon.svg",
@@ -240,7 +247,11 @@ const MenuList = ({ pages, openModal }) => {
                 key={i}
                 className={classNames(
                   styles.item,
-                  p.url === path ? styles.active : ""
+                  p.url === "/"
+                      ? (p.url === path || path.includes("home") ? styles.active : "")
+                      : p.url === "/taraweeh"
+                          ? (p.url === path || path.includes("taraweeh") ? styles.active : "")
+                          : (p.url === path ? styles.active : "")
                 )}
               >
                 <IonIcon

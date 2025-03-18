@@ -3,6 +3,7 @@ import { server, constants } from "../../lib/config";
 import PlayerModal from "./modal/PlayerModal";
 import Meta from "../core/Meta";
 import ChipBar from "../ui/ChipBar";
+import ChipBarTaraweeh from "../ui/ChipBarTaraweeh";
 import VideoCard from "../cards/home-video";
 import Loader from "../utils/Loader";
 import useOnScreen from "../../hooks/useOnScreen";
@@ -13,7 +14,7 @@ import {UIStore} from "../../store";
 import withChipbarStyles from "./QuranTranslations.module.css";
 import {getVideosDataByUrl} from "../../lib/fetch";
 
-export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription, isDisplayLocalizationChipBar, isShorts }) {
+export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription, isDisplayLocalizationChipBar, isShorts, taraweehPage }) {
     const pathname = window.location.pathname;
     const params = new URLSearchParams(window.location.search);
     const ref = useRef();
@@ -223,7 +224,14 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
                         <ChipBar activeId={activeSubCat} subCatClickHandler={subCatClickHandler} pathname={pathname} />
                     </div>
                 )}
-                <div className={`${styles.container} ${isDisplayLocalizationChipBar ? withChipbarStyles.withChipbar : ""} ${isShorts ? styles.shortsContainer : ""}`}>
+
+                {taraweehPage && (
+                    <div className={classNames(styles.header, isMini ? styles.mini : "", "chipbar")}>
+                        <ChipBarTaraweeh activeId={activeSubCat} subCatClickHandler={subCatClickHandler} pathname={pathname} taraweehPage={taraweehPage} />
+                    </div>
+                )}
+                <div
+                    className={`${styles.container} ${isDisplayLocalizationChipBar || taraweehPage ? withChipbarStyles.withChipbar : ""} ${isShorts ? styles.shortsContainer : ""}`}>
                     <div className={styles.content} ref={containerRef}>
                         {data.videos.map((video, index) => (
                             <div className={isShorts ? styles.shortsItem : styles.item} key={index}>

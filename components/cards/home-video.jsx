@@ -59,7 +59,7 @@ const VideoCard = ({ handleClick, attributes, isModalOpen, isShorts, pathname, u
                       {/*/>*/}
                       <Image
                           unoptimized
-                          src={attributes.sourceLogoUrl || ""}
+                          src={attributes.sourceLogoUrl.replace("s240", "s68").replace("s176", "s68").replace("s100", "s68")}
                           alt="Thumbnail"
                           width={50}
                           height={50}

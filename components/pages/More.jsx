@@ -38,6 +38,13 @@ import {informationCircleOutline} from "ionicons/icons";
 
 const pages1 = [
   {
+    title: "Ruqyah",
+    icon: "/icons/ruqya-icon.svg",
+    iconOutline: "/icons/ruqya-icon.svg",
+    url: "/ruqyah",
+    linkType: "internal",
+  },
+  {
     title: "Dua",
     icon: "/icons/dua-icon.svg",
     iconOutline: "/icons/dua-icon.svg",

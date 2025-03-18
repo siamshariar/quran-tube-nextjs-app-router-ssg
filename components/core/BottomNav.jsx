@@ -34,10 +34,10 @@ const pages = [
     linkType: "internal",
   },
   {
-    title: "Ruqyah",
-    icon: "/icons/ruqya-icon.svg",
-    iconOutline: "/icons/ruqya-icon.svg",
-    url: "/ruqyah",
+    title: "Taraweeh",
+    icon: "/icons/taraweeh.svg",
+    iconOutline: "/icons/taraweeh.svg",
+    url: "/taraweeh",
     linkType: "internal",
   },
   {
@@ -118,30 +118,32 @@ const BottomNav = () => {
               </div>
             )}
             {p.linkType == "internal" && (
-              <IonRouterLink
-                routerLink={p.url}
-                routerDirection="none"
-                detail={false}
-                lines="none"
-                key={i}
-                className={styles.item}
-              >
-                <div
-                    className={classNames(
-                        styles.inner,
-                        p.url === "/"
-                            ? (p.url === path || path.includes("home") ? styles.active : "")
-                            : (p.url === path ? styles.active : "")
-                    )}
+                <IonRouterLink
+                    routerLink={p.url}
+                    routerDirection="none"
+                    detail={false}
+                    lines="none"
+                    key={i}
+                    className={styles.item}
                 >
-                  <IonIcon
-                    icon={p.url === path ? p.icon : p.iconOutline}
-                    slot="start"
-                    className={styles.icon}
-                  />
-                  <IonLabel className={styles.label}>{p.title}</IonLabel>
-                </div>
-              </IonRouterLink>
+                  <div
+                      className={classNames(
+                          styles.inner,
+                          p.url === "/"
+                              ? (p.url === path || path.includes("home") ? styles.active : "")
+                              : p.url === "/taraweeh"
+                                  ? (p.url === path || path.includes("taraweeh") ? styles.active : "")
+                                  : (p.url === path ? styles.active : "")
+                      )}
+                  >
+                    <IonIcon
+                        icon={p.url === path ? p.icon : p.iconOutline}
+                        slot="start"
+                        className={styles.icon}
+                    />
+                    <IonLabel className={styles.label}>{p.title}</IonLabel>
+                  </div>
+                </IonRouterLink>
             )}
           </>
         ))}
