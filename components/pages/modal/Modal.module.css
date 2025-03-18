@@ -103,11 +103,12 @@
 
 .icon {
   font-size: 30px;
-  color: white;
+  /* color: white; */
   margin-bottom: px;
-  margin-top: 8px;
+  margin-top: 4px;
   margin-right: 15px;
   cursor: pointer;
+  color: #1A866D;
 }
 
 
@@ -177,6 +178,131 @@
 
 .replay_button:hover {
   background-color: #3700b3; /* Darker shade on hover */
+}
+.menuitem {
+  cursor: pointer;
+  margin: 0 15px;
+}
+
+.menuwrapper{
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  width: 100%;
+}
+.menucontent {
+  outline: none;
+  box-sizing: border-box;
+  width: 100%;
+  display: inline-grid;
+  background-color: hsla(0, 0%, 100%, .98);
+  border-radius: 4px;
+  box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%), 0 3px 1px -2px rgb(0 0 0 / 20%);
+  overflow: hidden;
+  width: 254px;
+}
+.menulist {
+  background-color: #fff;
+}
+.menulink {
+  padding: 10px 10px;
+  min-height: 44px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  color: #030303;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  cursor: pointer;
+}
+.menulink:hover {
+  background-color: #e5e5e5;
+}
+.menuicon {
+  font-size: 24px;
+  cursor: pointer;
+  cursor: pointer;
+  color: black;
+}
+.text {
+  display: inline;
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+  margin-top: 5px;
+  margin-bottom: 2px;
+  align-items: center;
+}
+.menudetails {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: black;
+}
+
+.favorite {
+  color: #1A866D;
+}
+
+/* Modal.module.css */
+.report_modal {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 400px;
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.report_modal h2 {
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.report_modal p {
+  margin-bottom: 15px;
+  font-size: 1rem;
+  color: #555;
+}
+
+.report_modal .textarea {
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  resize: none;
+}
+
+.report_modal button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.report_modal button:hover {
+  background-color: #0056b3;
 }
 
 
