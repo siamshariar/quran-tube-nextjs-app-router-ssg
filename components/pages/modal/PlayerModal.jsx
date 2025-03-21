@@ -102,6 +102,8 @@ export default function PlayerModal({
       player.stopVideo(); 
     }
 
+    setTimerDuration(null);
+    setResumingTime(null);
     setCurrentVideoId(null);
     setIsInitialVideo(false);
     handleClose();
@@ -247,7 +249,7 @@ export default function PlayerModal({
                                 <span className={styles.icon} style={{ color: isTimerSet ? "#1A866D" : "" }}>
                                   <IonIcon icon={isTimerSet ? timer : timerOutline} slot="start" />
                                 </span>
-                                <span className={styles.text}>{resumingTime > 0 ? `Resume Timer (${formatTime(resumingTime)})` : "Set Timer"}</span>
+                                <span className={styles.text}>{resumingTime > 0 ? `Cancel Timer (${formatTime(resumingTime)})` : "Set Timer"}</span>
                               </div>
                             </div>
                             {/* <div
