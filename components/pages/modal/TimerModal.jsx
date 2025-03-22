@@ -82,25 +82,25 @@ export default function TimerModal({ isOpen, onClose, onConfirm, resumingTime, o
 
   const handleDrag = (e, type) => {
     e.preventDefault();
-    let startY = e.clientY;
+    let startY = e.clientY || e.touches[0].clientY;
 
     const onMouseMove = (e) => {
-      const deltaY = startY - e.clientY;
+      const deltaY = startY - (e.clientY || e.touches[0].clientY);
       if (type === "hour") {
         if (deltaY > 10 && selectedHour < hours.length - 1) {
           setSelectedHour((prev) => prev + 1);
-          startY = e.clientY;
+          startY = e.clientY || e.touches[0].clientY;
         } else if (deltaY < -10 && selectedHour > 0) {
           setSelectedHour((prev) => prev - 1);
-          startY = e.clientY;
+          startY = e.clientY || e.touches[0].clientY;
         }
       } else if (type === "minute") {
         if (deltaY > 10 && selectedMinute < 60) {
           setSelectedMinute((prev) => prev + 1);
-          startY = e.clientY;
+          startY = e.clientY || e.touches[0].clientY;
         } else if (deltaY < -10 && selectedMinute > 1) {
           setSelectedMinute((prev) => prev - 1);
-          startY = e.clientY;
+          startY = e.clientY || e.touches[0].clientY;
         }
       }
     };
@@ -108,10 +108,14 @@ export default function TimerModal({ isOpen, onClose, onConfirm, resumingTime, o
     const onMouseUp = () => {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("touchmove", onMouseMove);
+      window.removeEventListener("touchend", onMouseUp);
     };
 
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("touchmove", onMouseMove);
+    window.addEventListener("touchend", onMouseUp);
   };
 
   const handleClose = () => {
@@ -217,7 +221,7 @@ export default function TimerModal({ isOpen, onClose, onConfirm, resumingTime, o
         ) : (
         <div className="flex justify-center pt-6 space-x-44">
           {/* Hours Column */}
-          <div className="text-center" onWheel={(e) => handleWheel(e, "hour")} onMouseDown={(e) => handleDrag(e, "hour")}>
+          <div className="text-center" onWheel={(e) => handleWheel(e, "hour")} onMouseDown={(e) => handleDrag(e, "hour")} onTouchStart={(e) => handleDrag(e, "hour")}>
             <p className="text-gray-500 text-lg mb-2" style={{ color: "#6b6d6f" }}>Hours</p>
             <div className="h-32 overflow-hidden">
               <div className="scrollable">
@@ -235,7 +239,7 @@ export default function TimerModal({ isOpen, onClose, onConfirm, resumingTime, o
             </div>
           </div>
 
-          <div className="text-center" onWheel={(e) => handleWheel(e, "minute")} onMouseDown={(e) => handleDrag(e, "minute")}>
+          <div className="text-center" onWheel={(e) => handleWheel(e, "minute")} onMouseDown={(e) => handleDrag(e, "minute")} onTouchStart={(e) => handleDrag(e, "minute")}>
             <p className="text-gray-500 text-lg mb-2" style={{ color: "#6b6d6f" }}>Minutes</p>
             <div className="h-32 overflow-hidden">
               <div className="scrollable">
