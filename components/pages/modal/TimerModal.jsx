@@ -3,7 +3,7 @@ import styles from "./TimerModal.module.css";
 
 export default function TimerModal({ isOpen, onClose, onConfirm, resumingTime, onCancelTimer }) {
   const [selectedHour, setSelectedHour] = useState(0);
-  const [selectedMinute, setSelectedMinute] = useState(5);
+  const [selectedMinute, setSelectedMinute] = useState(1);
   const [isClosing, setIsClosing] = useState(false);
   const [remainingTime, setRemainingTime] = useState(resumingTime);
 
@@ -13,7 +13,7 @@ export default function TimerModal({ isOpen, onClose, onConfirm, resumingTime, o
   const intervalRef = useRef(null);
 
   const hours = Array.from({ length: 13 }, (_, i) => i);
-  const minutes = Array.from({ length: 12 }, (_, i) => (i + 1) * 5);
+  const minutes = Array.from({ length: 60 }, (_, i) => i + 1);
 
   useEffect(() => {
     if (hoursRef.current[selectedHour]) {
@@ -22,8 +22,9 @@ export default function TimerModal({ isOpen, onClose, onConfirm, resumingTime, o
   }, [selectedHour]);
 
   useEffect(() => {
-    if (minutesRef.current[selectedMinute / 5 - 1]) {
-      minutesRef.current[selectedMinute / 5 - 1].scrollIntoView({ behavior: "smooth", block: "center" });
+    const minuteIndex = selectedMinute - 1;
+    if (minutesRef.current[minuteIndex]) {
+      minutesRef.current[minuteIndex].scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [selectedMinute]);
 
@@ -43,7 +44,7 @@ export default function TimerModal({ isOpen, onClose, onConfirm, resumingTime, o
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   useEffect(() => {
     if (resumingTime) {
@@ -60,7 +61,7 @@ export default function TimerModal({ isOpen, onClose, onConfirm, resumingTime, o
       }, 1000);
       return () => clearInterval(intervalRef.current);
     }
-  }, [resumingTime, onClose]);
+  }, [resumingTime, onClose, remainingTime]);
 
   const handleWheel = (e, type) => {
     e.preventDefault();
@@ -71,10 +72,10 @@ export default function TimerModal({ isOpen, onClose, onConfirm, resumingTime, o
         setSelectedHour(selectedHour + 1);
       }
     } else if (type === "minute") {
-      if (e.deltaY < 0 && selectedMinute > 5) {
-        setSelectedMinute(selectedMinute - 5);
-      } else if (e.deltaY > 0 && selectedMinute < minutes[minutes.length - 1]) {
-        setSelectedMinute(selectedMinute + 5);
+      if (e.deltaY < 0 && selectedMinute > 1) {
+        setSelectedMinute(selectedMinute - 1);
+      } else if (e.deltaY > 0 && selectedMinute < 60) {
+        setSelectedMinute(selectedMinute + 1);
       }
     }
   };
@@ -94,11 +95,11 @@ export default function TimerModal({ isOpen, onClose, onConfirm, resumingTime, o
           startY = e.clientY;
         }
       } else if (type === "minute") {
-        if (deltaY > 10 && selectedMinute < minutes[minutes.length - 1]) {
-          setSelectedMinute((prev) => prev + 5);
+        if (deltaY > 10 && selectedMinute < 60) {
+          setSelectedMinute((prev) => prev + 1);
           startY = e.clientY;
-        } else if (deltaY < -10 && selectedMinute > 5) {
-          setSelectedMinute((prev) => prev - 5);
+        } else if (deltaY < -10 && selectedMinute > 1) {
+          setSelectedMinute((prev) => prev - 1);
           startY = e.clientY;
         }
       }
@@ -134,23 +135,23 @@ export default function TimerModal({ isOpen, onClose, onConfirm, resumingTime, o
     handleClose();
   };
 
-const formatTime = (time) => {
-  const hours = Math.floor(time / 3600);
-  const minutes = Math.floor((time % 3600) / 60);
-  const seconds = time % 60;
-  if (hours > 0) {
-    return `${hours}h ${minutes}m ${seconds}s`;
-  } else if (minutes > 0) {
-    return `${minutes}m ${seconds}s`;
-  } else {
-    return `${seconds}s`;
-  }
-};
+  const formatTime = (time) => {
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60);
+    const seconds = time % 60;
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${seconds}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    } else {
+      return `${seconds}s`;
+    }
+  };
 
   useEffect(() => {
     if (!isOpen && !isClosing) {
       setSelectedHour(0);
-      setSelectedMinute(5);
+      setSelectedMinute(1);
       setRemainingTime(null);
     }
   }, [isOpen, isClosing]);
@@ -158,18 +159,53 @@ const formatTime = (time) => {
   if (!isOpen && !isClosing) return null;
 
   return (
-    <div className={`${styles.modalOverlay} ${isClosing ? styles.slideDown : styles.slideUp} fixed inset-0 flex justify-center items-end z-10`}>
-      <div ref={modalRef} className={`${styles.modalContent} ${isClosing ? styles.slideDownContent : styles.slideUpContent} bg-gray-200 w-full max-w-lg p-4 shadow-lg`}>
+    <div className={`${styles.modalOverlay} ${isClosing ? styles.slideDown : styles.slideUp} fixed inset-0 flex justify-center items-end z-10`}
+         style={{
+           backgroundColor: "rgba(0, 0, 0, 0.5)",
+         }}
+    >
+      <div ref={modalRef} className={`${styles.modalContent} ${isClosing ? styles.slideDownContent : styles.slideUpContent} bg-gray-200 w-full max-w-lg p-4 shadow-lg`}
+           style={{
+             backgroundColor: "#f8f9fa",
+             borderTopLeftRadius: "16px",
+             borderTopRightRadius: "16px",
+             boxShadow: "0 -4px 20px rgba(0, 0, 0, 0.1)",
+           }}
+      >
         {/* Header Buttons */}
-        <div className="flex justify-end text-teal-500 mb-2">
+        <div className="flex justify-end text-teal-500 mb-2" style={{ borderBottom: "1px solid #eaeaea", paddingBottom: "15px" }}>
           <button
             onClick={resumingTime ? handleCancel : handleClose}
             className="text-[14px] p-2 mr-4 font-medium"
-            style={{ color: "#3aad94" }}
+            style={{
+              color: "#718096",
+              // fontWeight: "600",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              background: "transparent",
+              border: "1px solid #718096",
+              transition: "all 0.2s ease",
+              letterSpacing: "0.5px",
+              // textTransform: "uppercase",
+            }}
           >
-            {resumingTime ? "CANCEL TIMER" : "CANCEL"}
+            {resumingTime ? "CANCEL TIMER" : "Cancel"}
           </button>
-          <button onClick={resumingTime ? handleClose : handleConfirm} className="text-[14px] p-2 font-medium" style={{ color: "#3aad94" }}>{resumingTime ? "HIDE" : "CONFIRM"}</button>
+          <button onClick={resumingTime ? handleClose : handleConfirm} className="text-[14px] p-2 font-medium"
+                  style={{
+                    color: "#00b894",
+                    // fontWeight: "600",
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    backgroundColor: "transparent",
+                    border: "1px solid #00b894",
+                    transition: "all 0.2s ease",
+                    letterSpacing: "0.5px",
+                    // textTransform: "uppercase",
+                  }}
+          >
+            {resumingTime ? "HIDE" : "Confirm"}
+          </button>
         </div>
 
         {resumingTime ? (
@@ -179,7 +215,7 @@ const formatTime = (time) => {
             </h2>
           </div>
         ) : (
-        <div className="flex justify-center pt-10 space-x-44">
+        <div className="flex justify-center pt-6 space-x-44">
           {/* Hours Column */}
           <div className="text-center" onWheel={(e) => handleWheel(e, "hour")} onMouseDown={(e) => handleDrag(e, "hour")}>
             <p className="text-gray-500 text-lg mb-2" style={{ color: "#6b6d6f" }}>Hours</p>
