@@ -1,0 +1,253 @@
+.panel_content {
+	height: 100%;
+}
+.wrapper {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.header {
+	color: #3d3d3f;
+	padding: 16px 0;
+}
+.header_content {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	height: 36px;
+}
+.container {
+    width: 100%;
+    padding-bottom: 49px;
+    justify-content: center;
+    align-items: flex-start;
+    max-width: 100%;
+    margin: 0 auto;
+}
+  
+.nav_left {
+	width: 50px;
+	display: flex;
+	justify-content: flex-start;
+}
+.back {
+	--padding-start: 0;
+	--padding-end: 0;
+}
+.back a {
+}
+.icon {
+	font-size: 20px;
+	color: #3d3d3f;
+}
+.nav_text {
+	font-family: "SFProDisplay";
+	font-style: normal;
+	font-weight: 400;
+	font-size: 17px;
+	line-height: 20px;
+	text-align: center;
+	letter-spacing: 0.5px;
+	color: #3d3d3f;
+}
+.search {
+	padding: 0;
+	margin-bottom: 14px;
+	height: 35px;
+	background-color: rgba(217, 217, 217, 0.6);
+	border-radius: 24px;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	padding-left: 14px;
+}
+.s_icon {
+	font-size: 18px;
+	color: #3d3d3f;
+}
+.search input {
+	border: none;
+	width: 100%;
+	line-height: 35px;
+	padding: 0 14px;
+	background-color: transparent;
+	font-family: "SFProDisplay";
+	font-size: 16px;
+	font-weight: 400;
+	letter-spacing: 0.5px;
+	color: #3d3d3f;
+}
+.search input::placeholder {
+	color: #3d3d3f;
+	opacity: 1;
+}
+.search input:-ms-input-placeholder {
+	color: #3d3d3f;
+}
+.search input::-ms-input-placeholder {
+	color: #3d3d3f;
+}
+.content {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 16px;
+  }
+
+.item {
+	justify-content: flex-start;
+	align-items: flex-start;
+	flex-wrap: wrap;
+	max-width: 1504px;
+	margin: 0 auto;
+}
+
+  .cardContainer {
+	padding: 0 6px;
+  }
+
+.reciter {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: 24px;
+	padding-top: 24px;
+}
+.reciter .reciter_name {
+	margin-bottom: 16px;
+	font-family: "SFProDisplay";
+	font-style: normal;
+	font-weight: 400;
+	font-size: 17px;
+	line-height: 20px;
+	text-align: center;
+	letter-spacing: 0.5px;
+	color: #3d3d3f;
+}
+.reciter .image {
+	width: 140px;
+	height: 140px;
+	border-radius: 50%;
+	overflow: hidden;
+}
+.reciter .image img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center center;
+}
+.favRecent .css-1h9z7r5-MuiButtonBase-root-MuiTab-root {
+	text-transform: none;
+}
+
+.searchWrapper {
+	padding: 16px;
+	border-radius: 8px;
+  }
+  
+  .searchInputContainer {
+	position: relative;
+	width: 100%;
+	max-width: 500px;
+	margin: 0 auto;
+  }
+  
+  .searchInput {
+	width: 100%;
+	padding: 10px 40px 10px 16px;
+	border: 1px solid #ccc;
+	border-radius: 24px;
+	font-size: 16px;
+	outline: none;
+  }
+  
+  .searchIcon {
+	position: absolute;
+	right: 16px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: #666;
+	pointer-events: none;
+  }
+  
+  .noFavorites {
+	grid-column: 1 / -1;
+	text-align: center;
+	color: #999;
+	font-size: 18px;
+	margin-top: 16px;
+  }
+
+  .loader {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 50px;
+  }
+  
+@media screen and (min-width: 588px) {
+	.header {
+		padding-top: 5px;
+		padding-bottom: 5px;
+	}
+
+	.container{
+		max-width: calc(100% - 12px);
+        width: 100%;
+	}
+
+}
+@media screen and (min-width: 1024px) {
+	.cardContainer {
+		width: 100%;
+	  }
+	.container{
+		width: 100%;
+        max-width: calc(100% - 32px);
+        padding-top: 24px;
+        padding-bottom: 0;
+	}
+	.wrapper {
+        margin-bottom: 40px;
+	}
+}
+@media screen and (min-width: 769px) {
+	.header {
+		/* padding-left: 30px; */
+		/* padding-right: 30px; */
+		/* position: fixed; */
+		/* width: 100%; */
+		/* top: 0; */
+		/* left: 0; */
+		/* z-index: 9; */
+	}
+	.nav_text {
+		font-size: 18px;
+	}
+}
+@media screen and (max-width: 874px) {
+	.header {
+		padding: 10px 30px;
+		background: linear-gradient(90deg, #8b959e, #cdd8e0);
+		position: fixed;
+		width: 100%;
+		left: 0;
+		top: 0;
+		z-index: 99;
+	}
+	.content {
+		grid-template-columns: repeat(1, 1fr);
+		gap: 16px;
+	  }
+}
+@media screen and (max-width: 420px) {
+	.header,
+	.wrapper {
+		padding: 0 6px;
+	}
+	.cardContainer {
+		width: 100%;
+		padding: 0 0px;
+	  }
+}

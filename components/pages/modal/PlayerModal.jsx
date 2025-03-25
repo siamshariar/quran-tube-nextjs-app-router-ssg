@@ -10,10 +10,13 @@ import classNames from "classnames";
 import {isMobile, isTablet} from 'react-device-detect';
 import YouTube from 'react-youtube';
 import { IonIcon } from "@ionic/react";
-import { timerOutline, timer } from "ionicons/icons";
+import { heartOutline, heart, timerOutline, timer } from "ionicons/icons";
 import { MoreVert } from "@mui/icons-material";
 import Popover from "@mui/material/Popover";
-import { share } from "../../../icons";
+import Link from "next/link";
+import { share, report } from "../../../icons";
+import { addFavoriteVideo, removeFavoriteVideo, FavoriteVideosStore } from "../../../store/FavoriteVideosStore";
+import { updateVideoProgress } from "../../../store/RecentVideosStore";
 import TimerModal from "./TimerModal";
 
 export default function PlayerModal({
@@ -30,15 +33,18 @@ export default function PlayerModal({
   // const playerRef = useRef(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const initVideoId = isIOS ? "p3Mrisem6ek" : videoId;
-  const [currentVideoId, setCurrentVideoId] = useState(initVideoId);
+  const [currentVideoId, setCurrentVideoId] = useState(null);
   const [player, setPlayer] = useState(null);
   const [isInitialVideo, setIsInitialVideo] = useState(true);
+  const [isFavorited, setIsFavorited] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isTimerModalOpen, setIsTimerModalOpen] = useState(false);
   const [timerDuration, setTimerDuration] = useState(null);
   const [resumingTime, setResumingTime] = useState(null);
   const [isTimerSet, setIsTimerSet] = useState(false);
   const timerRef = useRef(null);
+  const closeReportModal = () => setIsReportModalOpen(false);
   const handleClose = () => setAnchorEl(null);
 
   // Handle opening the share modal
@@ -59,16 +65,54 @@ export default function PlayerModal({
     setIsShareModalOpen(false);
   };
 
-  const attemptPlayVideo = (player, videoId, attemptsLeft = 3) => {
+  useEffect(() => {
+    const checkFavoriteStatus = () => {
+      const favorites = FavoriteVideosStore.getRawState().favoriteVideos || [];
+      const isVideoFavorited = Array.isArray(favorites) && favorites.some((video) => video.ytVideoId === videoId);
+      setIsFavorited(isVideoFavorited);
+    };
+
+    checkFavoriteStatus();
+
+    window.addEventListener('favoritesUpdated', checkFavoriteStatus);
+
+    return () => {
+      window.removeEventListener('favoritesUpdated', checkFavoriteStatus);
+    };
+  }, [videoId]);
+
+  const handleAddFavorite = async () => {
+    const videoDetails = {
+      slug: attributes.slug,
+      title: videoTitle || attributes.title,
+      ytVideoId: videoId || attributes.ytVideoId,
+      sourceLogoUrl: attributes.sourceLogoUrl,
+      addedAt: new Date().toISOString()
+    };
+
+    const newFavoritedState = !isFavorited;
+    const fullUrl = window.location.href;
+
+    if (newFavoritedState) {
+      await addFavoriteVideo(videoDetails, fullUrl);
+    } else {
+      await removeFavoriteVideo(videoId || attributes.ytVideoId);
+    }
+
+    setIsFavorited(newFavoritedState);
+    window.dispatchEvent(new CustomEvent('favoritesUpdated', { detail: { videoId: videoId || attributes.ytVideoId } }));
+  };
+
+  const attemptPlayVideo = (player, videoId, startTime, attemptsLeft = 3) => {
     try {
       if (player && videoId) {
-        player.loadVideoById(videoId); // Load the video
+        player.loadVideoById(videoId, startTime); // Load the video
         player.playVideo(); // Play the video
         player.unMute(); // Unmute the video
       }
     } catch (error) {
       if (attemptsLeft > 0) {
-        setTimeout(() => attemptPlayVideo(player, videoId, attemptsLeft - 1), 500); // Retry after 500ms
+        setTimeout(() => attemptPlayVideo(player, videoId, startTime, attemptsLeft - 1), 500); // Retry after 500ms
       } else {
         setCurrentVideoId(videoId);
       }
@@ -77,9 +121,11 @@ export default function PlayerModal({
 
   useEffect(() => {
     if (player && videoId) {
-      attemptPlayVideo(player, videoId);
+      const startTime = attributes.currentTime || 0;
+      setCurrentVideoId(videoId);
+      attemptPlayVideo(player, videoId, startTime);
     }
-  }, [videoId, currentVideoId, player]);
+  }, [videoId, player]);
 
   // const ShareIcon = () => (
   //   <IonIcon icon={shareOutline} slot="start" className={styles.icon} />
@@ -99,6 +145,9 @@ export default function PlayerModal({
   // CSS for hiding and showing modal
   const handleModalClose = () => {
     if (player) {
+      const currentTime = player.getCurrentTime();
+      const duration = player.getDuration();
+      updateVideoProgress(videoId, currentTime, duration);
       player.stopVideo(); 
     }
 
@@ -229,7 +278,23 @@ export default function PlayerModal({
                       <div className={styles.menuwrapper}>
                         <div className={styles.menucontent}>
                           <div className={styles.menulist}>
-                            <div className={styles.menulink} onClick={handleShareClick}>
+                            <div
+                             className={styles.menulink} onClick={async () => { await handleAddFavorite(); handleClose(); }}>
+                              <div className={styles.menudetails}>
+                                <span className={styles.icon}>
+                                  <IonIcon
+                                    icon={isFavorited ? heart : heartOutline}
+                                    slot="start"
+                                    className={isFavorited ? styles.favorite : ""}
+                                  />
+                                </span>
+                                <span className={styles.text}>{isFavorited ? "Remove Favourite" : "Add Favourite"}</span>
+                              </div>
+                            </div>
+                            <div className={styles.menulink} onClick={() => { 
+                                setIsShareModalOpen(true); 
+                                handleClose(); 
+                              }}>
                               <div className={styles.menudetails}>
                                 <span className={styles.icon}>
                                   <IonIcon icon={share} slot="start" />
@@ -300,6 +365,17 @@ export default function PlayerModal({
               resumingTime={resumingTime}
               onCancelTimer={handleCancelTimer}
             />
+            <Modal open={isReportModalOpen} onClose={closeReportModal}>
+              <div className={styles.report_modal}>
+                <h2>Report Video</h2>
+                <p>Please describe the issue with this video.</p>
+                <textarea
+                  className={styles.textarea}
+                  placeholder="Describe the issue here..."
+                ></textarea>
+                <button onClick={closeReportModal}>Submit</button>
+              </div>
+            </Modal>
           </div>
         </Fade>
       </Modal>

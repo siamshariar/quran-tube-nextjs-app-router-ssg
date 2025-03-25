@@ -72,6 +72,20 @@ const pages1 = [
     url: "/madinah",
     linkType: "internal",
   },
+  {
+    title: "Favorite",
+    icon: "/icons/favourites-icon.svg",
+    iconOutline: "/icons/favourites-icon.svg",
+    url: "/favorites",
+    linkType: "internal",
+  },
+  {
+    title: "Recents",
+    icon: "/icons/recents-icon.svg",
+    iconOutline: "/icons/recents-icon.svg",
+    url: "/recents",
+    linkType: "internal",
+  }
   // {
   //   title: "Salah Recitations",
   //   icon: library,

@@ -28,6 +28,14 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
     const [videoId, setVideoId] = useState();
     const [videoTitle, setVideoTitle] = useState();
     const [videoType, setVideoType] = useState();
+    const [playerModalData, setPlayerModalData] = useState({
+        attributes: {},
+        videoId: null,
+        videoTitle: null,
+        videoType: null,
+        metaTitle: null,
+        metaUrl: null,
+    });
     const [activeSubCat, setActiveSubCat] = useState();
     const [searchParam, setSearchParam] = useState();
     const [metaTitle, setMetaTitle] = useState();
@@ -45,6 +53,14 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const [toDateParam, setToDateParam] = useState(null);
     const [fromDateParam, setFromDateParam] = useState(null);
+    const [favoriteStatuses, setFavoriteStatuses] = useState({});
+
+    const handleFavoriteChange = (videoId, isFavorited) => {
+        setFavoriteStatuses(prev => ({
+          ...prev,
+          [videoId]: isFavorited
+        }));
+      };
 
     useEffect(() => {
         const handleOnline = () => setIsOnline(true);
@@ -167,9 +183,14 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
         // Push the updated URL without ?v=<slug>
         window.history.replaceState(null, "", updatedUrl);
 
-        setVideoId(null);
-        setVideoTitle(null);
-        setVideoType(null)
+        setPlayerModalData({
+            attributes: {},
+            videoId: null,
+            videoTitle: null,
+            videoType: null,
+            metaTitle: defaultMetaTitle,
+            metaUrl: `${server}${pathname}`,
+        });
     };
 
     const openModal = (ytVideoId, title, videoType, slug, e) => {
@@ -177,12 +198,9 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
             e.preventDefault();
         }
 
-        if (ytVideoId === videoId) {
+        if (ytVideoId === playerModalData.videoId) {
             return;
         }
-        setVideoId(ytVideoId);
-        setVideoTitle(title);
-        setVideoType(videoType)
 
         const urlParams = new URLSearchParams(window.location.search);
         let videoUrl= `${pathname}?${urlParams.toString()}`;
@@ -201,6 +219,15 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
         setMetaImage(`https://i.ytimg.com/vi/${ytVideoId}/maxresdefault.jpg`)
         setMetaStatusBarColor("#000000")
 
+        setPlayerModalData({
+            attributes: data.videos.find(video => video.ytVideoId === ytVideoId),
+            videoId: ytVideoId,
+            videoTitle: title,
+            videoType: videoType,
+            metaTitle: title,
+            metaUrl: `${server}${videoUrl}`,
+        });
+
         setModalOpen(true);
     };
 
@@ -217,7 +244,18 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
     return (
         <>
             <Meta title={metaTitle} description={metaDescription} url={metaUrl} image={metaImage} statusBarColor={metaStatusBarColor} type="website" />
-            <PlayerModal open={modalOpen} closer={handleModalClose} videoId={videoId} videoTitle={videoTitle} videoType={videoType} metaTitle={metaTitle} metaUrl={metaUrl} isIOS={isIOS} />
+            <PlayerModal
+                open={modalOpen}
+                closer={handleModalClose}
+                videoId={playerModalData.videoId}
+                videoTitle={playerModalData.videoTitle}
+                videoType={playerModalData.videoType}
+                metaTitle={playerModalData.metaTitle}
+                metaUrl={playerModalData.metaUrl}
+                isIOS={isIOS}
+                attributes={playerModalData.attributes}
+                onFavoriteChange={handleFavoriteChange}
+            />
             <div className={styles.wrapper}>
                 {isDisplayLocalizationChipBar && (
                     <div className={classNames(styles.header, isMini ? styles.mini : "", "chipbar")}>
@@ -241,6 +279,9 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
                                     isShorts={isShorts}
                                     pathname={pathname}
                                     urlParams={params}
+                                    isFavorited={favoriteStatuses[video.ytVideoId] || false}
+                                    onFavoriteChange={handleFavoriteChange}
+                                    setPlayerModalData={setPlayerModalData}
                                 />
                             </div>
                         ))}

@@ -99,6 +99,20 @@ const pages1 = [
     url: "/madinah",
     linkType: "internal",
   },
+  {
+    title: "Favorites",
+    icon: "/icons/favourites-icon.svg",
+    iconOutline: "/icons/favourites-icon.svg",
+    url: "/favorites",
+    linkType: "internal",
+  },
+  {
+    title: "Recents",
+    icon: "/icons/recents-icon.svg",
+    iconOutline: "/icons/recents-icon.svg",
+    url: "/recents",
+    linkType: "internal",
+  },
   // {
   //   title: "Quran with Nature",
   //   icon: "/icons/quran-with-nature-icon.svg",

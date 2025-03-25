@@ -23,6 +23,8 @@ import { useRouter } from "next/router";
 import TestPage from "./pages/TestPage";
 import TaraweehMaqqa from "./pages/TaraweehMaqqa";
 import TaraweehMadinah from "./pages/TaraweehMadinah";
+import Favorites from "./pages/Favorites";
+import Recents from "./pages/Recents";
 
 window
   .matchMedia("(prefers-color-scheme: dark)")
@@ -114,6 +116,8 @@ const App = () => {
               <Route exact path="/taraweeh" render={() => <Taraweeh />} />
               <Route exact path="/taraweeh-maqqa" render={() => <TaraweehMaqqa />} />
               <Route exact path="/taraweeh-madinah" render={() => <TaraweehMadinah />} />
+              <Route exact path="/favorites" render={() => <Favorites />} />
+              <Route exact path="/recents" render={() => <Recents />} />
 
               <Route exact path="/search" component={Search} />
 
