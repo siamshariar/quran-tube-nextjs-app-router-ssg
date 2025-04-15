@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { server, constants } from "../../lib/config";
 import PlayerModal from "./modal/PlayerModal";
 import Meta from "../core/Meta";
@@ -13,6 +13,7 @@ import classNames from "classnames";
 import {UIStore} from "../../store";
 import withChipbarStyles from "./QuranTranslations.module.css";
 import {getVideosDataByUrl} from "../../lib/fetch";
+import { Virtuoso } from "react-virtuoso"
 
 export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription, isDisplayLocalizationChipBar, isShorts, taraweehPage }) {
     const pathname = window.location.pathname;
@@ -54,6 +55,7 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
     const [toDateParam, setToDateParam] = useState(null);
     const [fromDateParam, setFromDateParam] = useState(null);
     const [favoriteStatuses, setFavoriteStatuses] = useState({});
+    const virtuosoRef = useRef(null);
 
     const handleFavoriteChange = (videoId, isFavorited) => {
         setFavoriteStatuses(prev => ({
@@ -141,14 +143,13 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
         }
     };
 
-    // Load more data when the user scrolls to the bottom of the page
-    useEffect(() => {
-        if (isVisible && !isLoadingMore && data.pagination.c !== null) {
+    const loadMore = () => {
+        if (!isLoadingMore && data.pagination.c !== null) {
             setIsloadingMore(true);
-            const url = getUrl(data.pagination, searchParam !== "" ? searchParam : activeSubCat, fromDateParam, toDateParam);
+            const url = getUrl(data.pagination, searchParam !== "" ? searchParam : activeSubCat, fromDateParam, toDateParam)
             fetchData(url, true);
         }
-    }, [isVisible]);
+    };
 
     const getVideoDetailUrl = (id) => {
       return `${constants.API_URL}/contents/${id}`;
@@ -241,6 +242,73 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
         return lastThreeParts[1];
     };
 
+    const getGroupedVideos = () => {
+      const videos = data.videos || []
+      const groupSize = getGroupSize()
+      const groups = []
+
+      const maxInitialGroups = 1
+      const maxVideosToShow = maxInitialGroups * groupSize
+
+      for (let i = 0; i < Math.min(videos.length, maxVideosToShow); i += groupSize) {
+        groups.push(videos.slice(i, i + groupSize))
+      }
+
+      return groups
+    }
+
+    const getGroupSize = () => {
+      if (typeof window === "undefined") return 1
+
+      const width = window.innerWidth
+      if (width >= 1024) return 4
+      if (width >= 874) return 3
+      if (width >= 588) return 2
+      return 1
+    }
+
+    const groupedVideos = useMemo(() => getGroupedVideos(), [data.videos, isShorts])
+
+    const renderGroup = (index) => {
+      const group = groupedVideos[index]
+      if (!group) return <div key={`empty-${index}`} />
+
+      return (
+        <div className={styles.content}>
+          {data.videos.map((video) => (
+            <div
+              key={video.ytVideoId}
+              className={`${isShorts ? styles.shortsItem : styles.item} ${styles.responsiveCard}`}
+              style={{
+                flex: `0 0 calc(${100 / getGroupSize()}% - 16px)`,
+                margin: "8px",
+                maxWidth: `calc(${100 / getGroupSize()}% - 16px)`,
+              }}
+            >
+              <VideoCard
+                attributes={video}
+                handleClick={(e) => openModal(video.ytVideoId, video.title, video.ytVideoType, video.slug, e)}
+                isShorts={isShorts}
+                pathname={pathname}
+                urlParams={params}
+                isFavorited={favoriteStatuses[video.ytVideoId] || false}
+                onFavoriteChange={handleFavoriteChange}
+                setPlayerModalData={setPlayerModalData}
+              />
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    const Footer = () => {
+      return isLoadingMore ? (
+        <div className={styles.loader}>
+          <Loader />
+        </div>
+      ) : null
+    }
+
     return (
         <>
             <Meta title={metaTitle} description={metaDescription} url={metaUrl} image={metaImage} statusBarColor={metaStatusBarColor} type="website" />
@@ -270,27 +338,28 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
                 )}
                 <div
                     className={`${styles.container} ${isDisplayLocalizationChipBar || taraweehPage ? withChipbarStyles.withChipbar : ""} ${isShorts ? styles.shortsContainer : ""}`}>
+                    {data.videos.length > 0 ? (
                     <div className={styles.content} ref={containerRef}>
-                        {data.videos.map((video, index) => (
-                            <div className={isShorts ? styles.shortsItem : styles.item} key={index}>
-                                <VideoCard
-                                    attributes={video}
-                                    handleClick={(e) => openModal(video.ytVideoId, video.title, video.ytVideoType, video.slug, e)}
-                                    isShorts={isShorts}
-                                    pathname={pathname}
-                                    urlParams={params}
-                                    isFavorited={favoriteStatuses[video.ytVideoId] || false}
-                                    onFavoriteChange={handleFavoriteChange}
-                                    setPlayerModalData={setPlayerModalData}
+                          <Virtuoso
+                            ref={virtuosoRef}
+                            useWindowScroll
+                            data={groupedVideos}
+                            endReached={loadMore}
+                            overscan={200}
+                            itemContent={renderGroup}
+                            components={{
+                              Footer,
+                          }}
+                            style={{ width: "100%", height: "100vh" }}
+                            totalCount={groupedVideos.length}
                                 />
                             </div>
-                        ))}
-                        {!isLoadingMore && data.videos.length < 1 && <p className={styles.tmpMsg}>
+                        ) : (
+                        !isLoadingMore && ( <p className={styles.tmpMsg}>
                             {isOnline ? "No content available!" : "No Internet connection!"}
-                        </p>}
-                        <div ref={ref} className={styles.loader}>{isLoadingMore && <Loader />}</div>
+                        </p>)
+                        )}
                         {/*<span style={{fontSize: `20px`}} ref={ref}>Server maintenance in progress. Will get back soon InshaAllah!</span>*/}
-                    </div>
                 </div>
             </div>
         </>

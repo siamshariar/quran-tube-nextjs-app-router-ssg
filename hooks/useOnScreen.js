@@ -8,12 +8,18 @@ const useOnScreen = (ref) => {
       setIntersecting(entry.isIntersecting)
     );
 
-    observer.observe(ref.current);
-    // Remove the observer as soon as the component is unmounted
+    const current = ref.current;
+    if (current) {
+      observer.observe(current);
+    }
+
     return () => {
+      if (current) {
+        observer.unobserve(current);
+      }
       observer.disconnect();
     };
-  }, []);
+  }, [ref]);
 
   return isIntersecting;
 };
