@@ -61,8 +61,10 @@ export default function PlayerModal({
 
   const attemptPlayVideo = (player, videoId, attemptsLeft = 3) => {
     try {
-      if (player && videoId) {
-        player.loadVideoById(videoId); // Load the video
+      if (player && videoId && currentVideoId) {
+        if (currentVideoId !== videoId && !isIOS) {
+          player.loadVideoById(videoId); // Load the video
+        }
         player.playVideo(); // Play the video
         player.unMute(); // Unmute the video
       }
@@ -70,7 +72,7 @@ export default function PlayerModal({
       if (attemptsLeft > 0) {
         setTimeout(() => attemptPlayVideo(player, videoId, attemptsLeft - 1), 500); // Retry after 500ms
       } else {
-        setCurrentVideoId(videoId);
+        console.error("Failed to play video after multiple attempts:", error);
       }
     }
   };
@@ -81,6 +83,14 @@ export default function PlayerModal({
     }
   }, [videoId, currentVideoId, player]);
 
+  useEffect(() => {
+    if (videoId && videoId !== currentVideoId) {
+      const newVideoId = isIOS ? "p3Mrisem6ek" : videoId;
+      setCurrentVideoId(newVideoId);
+      setIsInitialVideo(true);
+    }
+  }, [videoId, isIOS, currentVideoId]);
+
   // const ShareIcon = () => (
   //   <IonIcon icon={shareOutline} slot="start" className={styles.icon} />
   // );
@@ -88,6 +98,9 @@ export default function PlayerModal({
   const onReady = (e) => {
     let playerObj = e.target;
     setPlayer(playerObj);
+    if (isInitialVideo) {
+      setIsInitialVideo(false);
+    }
   };
 
   const onEnd = (e) => {
@@ -105,7 +118,8 @@ export default function PlayerModal({
     setTimerDuration(null);
     setResumingTime(null);
     // setCurrentVideoId(null); // This cause error in playing the next video
-    setIsInitialVideo(false);
+    setPlayer(null);
+    setIsInitialVideo(true);
     handleClose();
     closer(); 
     setIsTimerModalOpen(false);
@@ -179,25 +193,28 @@ export default function PlayerModal({
                     videoType === "Shorts" ? styles.shorts : ""
                 )}
             >
-              <YouTube
-                  videoId={currentVideoId}
-                  opts={{
-                    playerVars: {
-                      autoplay: 1,
-                      playsinline: 1, // forbid fullscreen on ios
-                      fs: 0,
-                      loop: 1,
-                      modestbranding: 1,
-                      showinfo: 0,
-                      mute: isIOS && isInitialVideo ? 1 : 0, // TODO: Add isIOS cond
-                      playlist: currentVideoId,
-                      rel: 0,
-                      iv_load_policy: 3,
-                    },
-                  }}
-                  onReady={onReady}
-                  onEnd={onEnd}
-              />
+              {currentVideoId && (
+                <YouTube
+                    key={currentVideoId}
+                    videoId={currentVideoId}
+                    opts={{
+                      playerVars: {
+                        autoplay: 1,
+                        playsinline: 1, // forbid fullscreen on ios
+                        fs: 0,
+                        loop: 1,
+                        modestbranding: 1,
+                        showinfo: 0,
+                        mute: isIOS && isInitialVideo ? 1 : 0, // TODO: Add isIOS cond
+                        playlist: currentVideoId,
+                        rel: 0,
+                        iv_load_policy: 3,
+                      },
+                    }}
+                    onReady={onReady}
+                    onEnd={onEnd}
+                />
+              )}
             </div>
 
             <div className={styles.title_area}>
