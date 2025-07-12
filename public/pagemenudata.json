@@ -1,0 +1,208 @@
+{
+    "data": [
+        {
+            "id": 7,
+            "attributes": {
+                "name": "Arabic",
+                "code": "ar"
+            }
+        },
+        {
+            "id": 5,
+            "attributes": {
+                "name": "Bengali",
+                "code": "bn"
+            }
+        },
+        {
+            "id": 26,
+            "attributes": {
+                "name": "Bosnia",
+                "code": "bs-BA"
+            }
+        },
+        {
+            "id": 15,
+            "attributes": {
+                "name": "Chinese",
+                "code": "cn"
+            }
+        },
+        {
+            "id": 2,
+            "attributes": {
+                "name": "English",
+                "code": "en"
+            }
+        },
+        {
+            "id": 11,
+            "attributes": {
+                "name": "French",
+                "code": "fr"
+            }
+        },
+        {
+            "id": 13,
+            "attributes": {
+                "name": "German",
+                "code": "de"
+            }
+        },
+        {
+            "id": 6,
+            "attributes": {
+                "name": "Hindi",
+                "code": "hi"
+            }
+        },
+        {
+            "id": 8,
+            "attributes": {
+                "name": "Indonesian",
+                "code": "id"
+            }
+        },
+        {
+            "id": 23,
+            "attributes": {
+                "name": "Korean",
+                "code": "ko"
+            }
+        },
+        {
+            "id": 17,
+            "attributes": {
+                "name": "Latin",
+                "code": "latin"
+            }
+        },
+        {
+            "id": 4,
+            "attributes": {
+                "name": "Malay",
+                "code": "ms"
+            }
+        },
+        {
+            "id": 19,
+            "attributes": {
+                "name": "Malayalam",
+                "code": "ml"
+            }
+        },
+        {
+            "id": 25,
+            "attributes": {
+                "name": "Maranao",
+                "code": "mrw"
+            }
+        },
+        {
+            "id": 22,
+            "attributes": {
+                "name": "Oromo",
+                "code": "orm"
+            }
+        },
+        {
+            "id": 18,
+            "attributes": {
+                "name": "Persian",
+                "code": "fa"
+            }
+        },
+        {
+            "id": 16,
+            "attributes": {
+                "name": "Portuguese",
+                "code": "pt"
+            }
+        },
+        {
+            "id": 30,
+            "attributes": {
+                "name": "Quran",
+                "code": "quran"
+            }
+        },
+        {
+            "id": 14,
+            "attributes": {
+                "name": "Russian",
+                "code": "ru"
+            }
+        },
+        {
+            "id": 28,
+            "attributes": {
+                "name": "Sindhi",
+                "code": "sd"
+            }
+        },
+        {
+            "id": 21,
+            "attributes": {
+                "name": "Sinhala",
+                "code": "sin"
+            }
+        },
+        {
+            "id": 24,
+            "attributes": {
+                "name": "Somali",
+                "code": "so"
+            }
+        },
+        {
+            "id": 12,
+            "attributes": {
+                "name": "Spanish",
+                "code": "es"
+            }
+        },
+        {
+            "id": 20,
+            "attributes": {
+                "name": "Swahili",
+                "code": "sw"
+            }
+        },
+        {
+            "id": 29,
+            "attributes": {
+                "name": "Telugu",
+                "code": "te"
+            }
+        },
+        {
+            "id": 27,
+            "attributes": {
+                "name": "Thai",
+                "code": "th"
+            }
+        },
+        {
+            "id": 9,
+            "attributes": {
+                "name": "Turkish",
+                "code": "tr"
+            }
+        },
+        {
+            "id": 3,
+            "attributes": {
+                "name": "Urdu",
+                "code": "ur"
+            }
+        }
+    ],
+    "meta": {
+        "pagination": {
+            "page": 1,
+            "pageSize": 100,
+            "pageCount": 1,
+            "total": 29
+        }
+    }
+}

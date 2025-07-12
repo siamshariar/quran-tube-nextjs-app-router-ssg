@@ -1,3 +1,5 @@
+
+
 exports.sample = 'data:image/svg+xml;utf8,';
 
 exports.next = 'data:image/svg+xml;utf8,<svg viewBox="0 0 16 16" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon" style="pointer-events: none; display: block; width: 100%; height: 100%;"><g mirror-in-rtl="" class="style-scope yt-icon"><path d="M4.97,12.65L9.62,8L4.97,3.35l0.71-0.71L11.03,8l-5.35,5.35L4.97,12.65z" class="style-scope yt-icon"></path></g></svg>';
@@ -78,6 +80,28 @@ exports.captivePortal = 'data:image/svg+xml;utf8,<svg xmlns="https://www.w3.org/
 
 exports.historyEdu = 'data:image/svg+xml;utf8,<svg xmlns="https://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M320-160q-33 0-56.5-23.5T240-240v-120h120v-90q-35-2-66.5-15.5T236-506v-44h-46L60-680q36-46 89-65t107-19q27 0 52.5 4t51.5 15v-55h480v520q0 50-35 85t-85 35H320Zm120-200h240v80q0 17 11.5 28.5T720-240q17 0 28.5-11.5T760-280v-440H440v24l240 240v56h-56L510-514l-8 8q-14 14-29.5 25T440-464v104ZM224-630h92v86q12 8 25 11t27 3q23 0 41.5-7t36.5-25l8-8-56-56q-29-29-65-43.5T256-684q-20 0-38 3t-36 9l42 42Zm376 350H320v40h286q-3-9-4.5-19t-1.5-21Zm-280 40v-40 40Z"/></svg>';
 
-exports.radioIcon = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M160-80q-33 0-56.5-23.5T80-160v-480q0-25 13.5-45t36.5-29l506-206 26 66-330 134h468q33 0 56.5 23.5T880-640v480q0 33-23.5 56.5T800-80H160Zm0-80h640v-280H160v280Zm160-40q42 0 71-29t29-71q0-42-29-71t-71-29q-42 0-71 29t-29 71q0 42 29 71t71 29ZM160-520h480v-80h80v80h80v-120H160v120Zm0 360v-280 280Z"/></svg>';
+exports.prayingIcon = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24"><path d="M12 2c1.1 0 2 .9 2 2v4h2V4c0-1.1.9-2 2-2s2 .9 2 2v4h1c1.1 0 2 .9 2 2v5c0 .55-.45 1-1 1h-2v5c0 .55-.45 1-1 1h-3c-.55 0-1-.45-1-1v-2h-2v2c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-5H4c-.55 0-1-.45-1-1v-5c0-1.1.9-2 2-2h1V4c0-1.1.9-2 2-2s2 .9 2 2v4h2V4c0-1.1.9-2 2-2zm2 14h2v-4h2v4h2v-5h-2V9h-2v2h-2v5zm-6 0h2v-4H8v4H6v-5h2V9h2v2h2v5z"/></svg>';
+
+exports.quranRadio =
+    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="black"><path d="M12 3C9.5 3 7.2 4.5 6 6.5V6C6 4.3 7.8 3 10 3H12C14.2 3 16 4.3 16 6V6.5C14.8 4.5 12.5 3 10 3H12Z" fill="%23000"/><path d="M3 6H5V18H3V6Z" fill="%23000"/><path d="M19 6H21V18H19V6Z" fill="%23000"/><path d="M7 20C8.2 20 9.2 19.6 10 19H14C14.8 19.6 15.8 20 17 20C18.2 20 19.2 19.6 20 19H22V21H20C18.8 21 17.8 21.4 17 22H7C6.2 21.4 5.2 21 4 21H2V19H4C5.2 19 6.2 19.4 7 20Z" fill="%23000"/></svg>';
 
 exports.forestIcon = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M280-80v-160H0l154-240H80l280-400 120 172 120-172 280 400h-74l154 240H680v160H520v-160h-80v160H280Zm389-240h145L659-560h67L600-740l-71 101 111 159h-74l103 160Zm-523 0h428L419-560h67L360-740 234-560h67L146-320Zm0 0h155-67 252-67 155-428Zm523 0H566h74-111 197-67 155-145Zm-149 80h160-160Zm201 0Z"/></svg>';
+
+exports.kaabaIcon = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 64 64"><path d="M32 4l28 12v32L32 60 4 48V16L32 4zm0 4.236L10 16.8v27.764l22 9.2 22-9.2V16.8L32 8.236zM16 28h32v4H16v-4zm0 8h32v4H16v-4z"/></svg>';
+
+exports.ruqyahIcon = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="64" width="64" viewBox="0 0 64 64"><g fill="#000000"><path d="M32 2C30.9 2 30 2.9 30 4v4h-4V4c0-1.1-.9-2-2-2s-2 .9-2 2v4h-4V4c0-1.1-.9-2-2-2s-2 .9-2 2v18h6v-4h8v4h4V10h2v6h4v-4h8v4h6V4c0-1.1-.9-2-2-2s-2 .9-2 2v4h-4V4c0-1.1-.9-2-2-2s-2 .9-2 2v6h-4V4c0-1.1-.9-2-2-2z"/><path d="M12 22v38h40V22H12zm16 6h8v14h-8V28zM14 40v4h4v-4h-4zm32 0v4h4v-4h-4z"/><path d="M32 30c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8z"/><path d="M32 36c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/><path d="M24 42c-.6 0-1 .4-1 1s.4 1 1 1h16c.6 0 1-.4 1-1s-.4-1-1-1H24z"/></g></svg>';
+
+exports.madinahIcon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij4gICAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIj4gICAgICAgIDxwYXRoIGQ9Ik0xMiAzQzktNiA3IDkgNyAxMmgxMGMwLTMtMi02LTUtOXoiIGZpbGw9IiMwMDAwMDAiIHN0cm9rZT0iIzAwMDAwMCIvPiAgICAgICAgPHJlY3QgeD0iMTciIHk9IjUiIHdpZHRoPSIyIiBoZWlnaHQ9IjEyIiBmaWxsPSIjMDAwMDAwIi8+ICAgICAgICA8cmVjdCB4PSI0IiB5PSIxMiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjYiIGZpbGw9IiNGZmYiIHN0cm9rZT0iIzAwMDAwMCIvPiAgICAgICAgPHJlY3QgeD0iMTAiIHk9IjE0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwMDAwIi8+ICAgIDwvZz48L3N2Zz4=';
+
+exports.shortsIcon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCI+PHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSJ3aGl0ZSIvPjxwYXRoIGQ9Ik0yNCA0QzEzLjUgNCA0IDEwIDQgMjRzOS41IDIwIDIwIDIwIDIwLTYgMjAtMjAtOS41LTIwLTIwLTIwem0tMiAzMHYtMTJsMTAgNi0xMCA2em0xMC0xN2wtMTAgNlYxMWwxMCA2eiIgZmlsbD0iYmxhY2siLz48L3N2Zz4=';
+
+exports.donate =
+	'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M640-440 474-602q-31-30-52.5-66.5T400-748q0-55 38.5-93.5T532-880q32 0 60 13.5t48 36.5q20-23 48-36.5t60-13.5q55 0 93.5 38.5T880-748q0 43-21 79.5T807-602L640-440Zm0-112 109-107q19-19 35-40.5t16-48.5q0-22-15-37t-37-15q-14 0-26.5 5.5T700-778l-60 72-60-72q-9-11-21.5-16.5T532-800q-22 0-37 15t-15 37q0 27 16 48.5t35 40.5l109 107ZM280-220l278 76 238-74q-5-9-14.5-15.5T760-240H558q-27 0-43-2t-33-8l-93-31 22-78 81 27q17 5 40 8t68 4q0-11-6.5-21T578-354l-234-86h-64v220ZM40-80v-440h304q7 0 14 1.5t13 3.5l235 87q33 12 53.5 42t20.5 66h80q50 0 85 33t35 87v40L560-60l-280-78v58H40Zm80-80h80v-280h-80v280Zm520-546Z"/></svg>';
+
+exports.mobileApp =
+	'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M720-960H240q-33 0-56.5 23.5T160-880v720q0 33 23.5 56.5T240-80h480q33 0 56.5-23.5T800-160v-720q0-33-23.5-56.5T720-960Zm-240 80h60v40h-60v-40Zm30 880q-21 0-35.5-14.5T460-120q0-21 14.5-35.5T510-170q21 0 35.5 14.5T560-120q0 21-14.5 35.5T510 0ZM720-240H240v-560h480v560Z"/></svg>';
+
+    exports.shareOutline = 
+    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M13 3V13H11V3L7.5 6.5L6.08 5.08L12 0L17.92 5.08L16.5 6.5L13 3ZM5 10V20H19V10H21V20C21 21.1 20.1 22 19 22H5C3.9 22 3 21.1 3 20V10H5Z"/></svg>';
+    
+    

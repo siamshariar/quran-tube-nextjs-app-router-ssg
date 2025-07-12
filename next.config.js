@@ -1,24 +1,16 @@
-const uploadPlaylistID = "UUbMys3ID_1S8D1mZuYkoG2A";
-const withPWA = require("next-pwa");
+const withPWA = require('next-pwa')({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development", // Disable PWA in development mode
+  register: true,
+});
 
 module.exports = withPWA({
-  webpack5: false,
-  pwa: {
-    dest: "public",
-    disable: process.env.NODE_ENV === "development",
-    register: true,
-    // skipWaiting: true,
-  },
-  async redirects() {
-    return [
-      {
-        source: "/watch",
-        destination: `/watch/${uploadPlaylistID}`,
-        permanent: true,
-      },
-    ];
-  },
   images: {
-    domains: ["localhost", "quran.tube", "www.quran.tube", "i.ytimg.com"],
+    domains: ["localhost", "quran.tube", "www.quran.tube", "i.ytimg.com", "yt3.ggpht.com", "cdn.example.com"],
+  },
+  env: {
+    BASE_URL: !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+        ? process.env.L_BASE_URL
+        : "https://www.quran.tube",
   },
 });

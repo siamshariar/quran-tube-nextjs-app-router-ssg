@@ -1,80 +1,111 @@
+import { useRef, useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/router";
 import classNames from "classnames";
 import styles from "./Video.module.css";
-import { server } from "../../lib/config";
+import PlayerModal from "../pages/modal/PlayerModal";
 import { format } from "../../lib/format";
-import { IonRouterLink, IonIcon, IonButton } from "@ionic/react";
-import { ellipsisVertical } from "../../icons";
-import { useRef, useEffect, useState } from "react";
-import {
-  PopupStore,
-  setPopupOpen,
-  setPopupReference,
-  setPopupVideoId,
-  PreviewStore,
-  setPreviewOpen,
-  setPreviewReference,
-  setPreviewVideo,
-} from "../../store";
 
-const VideoCard = ({ attributes, handleClick }) => {
-  const open = PopupStore.useState((s) => s.open);
-  const reference = PopupStore.useState((s) => s.reference);
-  const popupReference = useRef(null);
+const getContentId = (slug) => {
+  if (!slug || typeof slug !== "string") {
+    console.error("Invalid slug:", slug);
+    return null;
+  }
+  const parts = slug.split("-");
+  const lastThreeParts = parts.slice(-3);
+  return lastThreeParts[1];
+};
 
-  const handlePopup = (e) => {
-    e.stopPropagation();
-    setPopupReference(popupReference.current);
-    setPopupVideoId(attributes.ytVideoId);
-    setPopupOpen(true);
+const VideoCard = ({ attributes, handleClick, isModalOpen, id, code, subCatClickHandler, onModalClose }) => {
+  const [selectedVideoId, setSelectedVideoId] = useState(null);
+  const [videoDetail, setVideoDetail] = useState(null);
+  const router = useRouter();
+  const isUserInteraction = useRef(false);
+
+  const openVideo = useCallback(
+    (details) => {
+      const videoId = getContentId(details.slug);
+      if (videoId) {
+        setSelectedVideoId(videoId);
+        setVideoDetail(details);
+        handleClick();
+        isUserInteraction.current = true;
+
+        // Retrieve `code` from the current URL
+        const { code } = router.query;
+
+        // Construct the URL with both `code` and `?v=`
+        const videoUrl = `/home/?v=${encodeURIComponent(details.slug)}`;
+
+        router.push(videoUrl, undefined, { shallow: true });
+        sessionStorage.setItem("lastOpenedVideo", videoId);
+      }
+    },
+    [handleClick, router]
+  );
+
+  const handleItemClick = (id, code) => {
+    subCatClickHandler(id, code); // Call the handler to update activeId or other state
+    router.push(`/home/${encodeURIComponent(code)}`, undefined, { shallow: true }); // Update URL without page reload
   };
 
-  // useEffect(() => {
-  //   if (open && reference == popupReference.current) {
-  //     popupReference.current.classList.add(styles.active);
-  //   } else {
-  //     popupReference.current.classList.remove(styles.active);
-  //   }
-  // }, [open, reference]);
+  const closeModal = useCallback(() => {
+    onModalClose();
+    setSelectedVideoId(null);
+    setVideoDetail(null);
 
-  // preview
-  const previewOpen = PreviewStore.useState((s) => s.open);
-  const previewReference = PreviewStore.useState((s) => s.reference);
-  const previewRef = useRef(null);
+    const { v, ...updatedQuery } = router.query;
+    router.replace(
+      { pathname: router.pathname, query: updatedQuery },
+      undefined,
+      { shallow: true }
+    );
 
-  const [timeout, updateTimeout] = useState(null);
+    isUserInteraction.current = false;
 
-  const handlePreviewOnHover = (hover) => {
-    // e.stopPropagation();
-    if (hover) {
-      updateTimeout(
-        setTimeout(() => {
-          setPreviewReference(previewRef.current);
-          setPreviewVideo({
-            id,
-            image,
-            title,
-            publishedAt,
-            channelId,
-            channelTitle,
-            statistics,
-            channelThumbnails,
-          });
-          setPreviewOpen(true);
-        }, 1000)
-      );
-    } else {
-      clearTimeout(timeout);
-      setPreviewOpen(false);
-    }
-  };
+    sessionStorage.removeItem("lastOpenedVideo");
+  }, [onModalClose, router]);
+
+  const handleVideoClick = useCallback(() => {
+    openVideo(attributes);
+  }, [attributes, openVideo]);
 
   useEffect(() => {
-    if (previewOpen && previewReference == previewRef.current) {
-      previewRef.current.classList.add(styles.active);
-    } else {
-      previewRef.current.classList.remove(styles.active);
+    if (!router.isReady) return;
+
+    const { v } = router.query;
+    const lastOpenedVideo = sessionStorage.getItem("lastOpenedVideo");
+
+    // Check if we have a video ID from the query
+    if (v && !isUserInteraction.current) {
+      const videoId = getContentId(v);
+      if (videoId && videoId === getContentId(attributes.slug) && lastOpenedVideo !== videoId) {
+        openVideo(attributes);
+      }
     }
-  }, [previewOpen, previewReference]);
+  }, [router.isReady, router.query, attributes.slug, openVideo]);
+
+  useEffect(() => {
+    const handleRouteChange = (url) => {
+      const newQuery = new URLSearchParams(url.split("?")[1]);
+      const v = newQuery.get("v");
+      const lastOpenedVideo = sessionStorage.getItem("lastOpenedVideo");
+
+      if (v && !isUserInteraction.current) {
+        const videoId = getContentId(v);
+        if (videoId && videoId === getContentId(attributes.slug) && lastOpenedVideo !== videoId) {
+          openVideo(attributes);
+        }
+      }
+    };
+
+    // Subscribe to route change events
+    router.events.on("routeChangeComplete", handleRouteChange);
+
+    // Clean up the subscription on component unmount
+    return () => {
+      router.events.off("routeChangeComplete", handleRouteChange);
+    };
+  }, [attributes.slug, openVideo, router.events]);
 
   return (
     <div className={styles.wrapper}>
@@ -82,57 +113,30 @@ const VideoCard = ({ attributes, handleClick }) => {
         <div className={styles.inner}>
           <div className={styles.media}>
             <div
-              className={styles.thumb}
-              onClick={() => handleClick(attributes.ytVideoId)}
+              className={classNames(styles.thumb, { [styles.disabled]: isModalOpen })}
+              onClick={isModalOpen ? null : handleVideoClick}
             >
               <img
-                // src={
-                //   image
-                //     ? `https://i.ytimg.com/vi/${id}/mqdefault.jpg`
-                //     : `${server}/img/youtube/youtube-default.jpg`
-                // }
                 src={`https://i.ytimg.com/vi/${attributes.ytVideoId}/mqdefault.jpg`}
-                alt=""
-                ref={previewRef}
-                // onMouseEnter={() => handlePreviewOnHover(true)}
-                // onMouseLeave={() => handlePreviewOnHover(false)}
+                alt={attributes.title}
               />
             </div>
-
             <div className={styles.details}>
-              <div
-                className={styles.avatar}
-                onClick={() => handleClick(attributes.ytVideoId)}
-              >
+              <div className={classNames(styles.avatar, { [styles.disabled]: isModalOpen })}>
                 <img
-                  src={attributes.sourceLogoUrl ? attributes.sourceLogoUrl : ""} //
-                  alt=""
+                  src={attributes.sourceLogoUrl || ""}
+                  alt="Source Logo"
+                  onClick={isModalOpen ? null : handleVideoClick}
                 />
               </div>
               <div className={styles.meta}>
                 <div className={styles.meta_top}>
-                  <div
-                    onClick={() => handleClick(attributes.ytVideoId)}
-                    className={styles.title}
-                  >
+                  <div className={styles.title} onClick={isModalOpen ? null : handleVideoClick}>
                     <h3>{attributes.title}</h3>
                   </div>
-                  {/*<div className={styles.popup_button} ref={popupReference}>*/}
-                  {/*  <IonIcon*/}
-                  {/*    icon={ellipsisVertical}*/}
-                  {/*    slot="start"*/}
-                  {/*    className={styles.icon}*/}
-                  {/*    onClick={(e) => handlePopup(e)}*/}
-                  {/*  />*/}
-                  {/*</div>*/}
                 </div>
-
                 <div className={styles.metadata}>
-                  {/* <div className={styles.top}>{channelTitle}</div> */}
                   <div className={styles.bottom}>
-                    {/* <span>
-                      {statistics ? format.count(statistics[id]) : ""} views
-                    </span> */}
                     <span>{format.date(attributes.contentPublishedAt)}</span>
                   </div>
                 </div>
@@ -141,6 +145,16 @@ const VideoCard = ({ attributes, handleClick }) => {
           </div>
         </div>
       </div>
+
+      {selectedVideoId && (
+        <PlayerModal
+          open={isModalOpen}
+          closer={closeModal}
+          src={videoDetail?.ytVideoId}
+          videoDetail={videoDetail}
+          attributes={attributes}
+        />
+      )}
     </div>
   );
 };

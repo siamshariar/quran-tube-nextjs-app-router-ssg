@@ -1,91 +1,94 @@
 import styles from "./ChipBar.module.css";
 import classNames from "classnames";
-import { useEffect, useRef, useState } from "react";
-import {
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonMenu,
-  IonMenuToggle,
-  IonTitle,
-  IonToolbar,
-} from "@ionic/react";
-import {
-  exploreOutline,
-  previous as prevIcon,
-  next as nextIcon,
-} from "../../icons";
+import {useEffect, useRef, useState} from "react";
+import {useRouter} from "next/router";
+import {IonIcon, IonLabel} from "@ionic/react";
+import {next as nextIcon, previous as prevIcon} from "../../icons";
+import localizationData from '../../public/pagemenudata.json';
+import Link from "next/link";
 
-const ChipBar = ({ locales, activeId, subCatClickHandler }) => {
+const ChipBar = ({ activeId, subCatClickHandler, pathname }) => {
+  const locales = localizationData.data;
   const containerRef = useRef(null);
   const contentRef = useRef(null);
+  const router = useRouter();
 
   const [containerWidth, setContainerWidth] = useState(0);
   const [contentWidth, setContentWidth] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
   const handleScroll = (dir) => {
-    if (dir === "left" && scrollLeft < contentWidth - containerWidth) {
-      scrollLeft + 120 > contentWidth - containerWidth
-        ? setScrollLeft(contentWidth - containerWidth)
-        : setScrollLeft(scrollLeft + 120);
-    } else if (dir === "right" && scrollLeft >= 0) {
-      scrollLeft - 120 < 0 ? setScrollLeft(0) : setScrollLeft(scrollLeft - 120);
+    const maxScrollLeft = contentWidth - containerWidth;
+    if (dir === "left") {
+      setScrollLeft((prev) => Math.min(prev + 540, maxScrollLeft));
+    } else if (dir === "right") {
+      setScrollLeft((prev) => Math.max(prev - 540, 0));
+    }
+  };
+
+  const setWidth = () => {
+    if (containerRef.current && contentRef.current) {
+      setContainerWidth(containerRef.current.offsetWidth);
+      setContentWidth(contentRef.current.offsetWidth);
     }
   };
 
   useEffect(() => {
-    const setWidth = () => {
-      setContainerWidth(containerRef.current.offsetWidth);
-      setContentWidth(contentRef.current.offsetWidth);
-    };
-
-    window.addEventListener("load", setWidth);
+    setWidth(); // Initial setting of widths
     window.addEventListener("resize", setWidth);
-
-    return () => {
-      window.removeEventListener("load", setWidth);
-      window.removeEventListener("resize", setWidth);
-    };
+    return () => window.removeEventListener("resize", setWidth);
   }, []);
 
   useEffect(() => {
-    setContainerWidth(containerRef.current.offsetWidth);
-    setContentWidth(contentRef.current.offsetWidth);
+    setWidth();
   }, [locales]);
 
   useEffect(() => {
-    containerRef.current.scrollLeft = scrollLeft;
+    if (containerRef.current) {
+      containerRef.current.scrollLeft = scrollLeft;
+    }
   }, [scrollLeft, containerWidth, contentWidth]);
+
+  const handleItemClick = (id, code) => {
+    let firstPathSegment = pathname.split("/")[1] || "/";
+    firstPathSegment = id === null && firstPathSegment === "home" ? "/" : firstPathSegment
+    firstPathSegment = id !== null && firstPathSegment === "/" ? "/home" : firstPathSegment
+    const path = id === null ? firstPathSegment : `${firstPathSegment}/${encodeURIComponent(code)}`;
+    subCatClickHandler(id, code); // Call the handler to update activeId or other state
+    router.push(`${path}`, undefined, { shallow: true }); // Update URL without page reload
+  };
+
+  const getPath = (id, code) => {
+    // debugger;
+    let firstPathSegment = pathname.split("/")[1] || "/";
+    firstPathSegment = id === null && firstPathSegment === "home" ? "/" : firstPathSegment
+    firstPathSegment = id !== null && firstPathSegment === "/" ? "/home" : firstPathSegment
+    const seg = id === null ? firstPathSegment : `${firstPathSegment}/${encodeURIComponent(code)}`;
+    return !seg.split("/")[1] && seg.length > 1 ? seg+"?t=all" : seg;
+  };
 
   return (
     <div className={styles.wrapper}>
       <div className={styles.content} ref={containerRef}>
         <ul className={styles.list} ref={contentRef}>
-          <li
-            className={classNames(styles.item, activeId ? "" : styles.active)}
-            onClick={() => subCatClickHandler(null)}
-          >
-            <IonLabel className={styles.label}>All</IonLabel>
-          </li>
-          {locales.map((t, i) => (
+          <Link href={getPath(null, 'all')}>
             <li
-              key={i}
-              className={classNames(
-                styles.item,
-                // t.mobile ? styles.mobile : t.active ? styles.active : ""
-                t.id == activeId ? styles.active : ""
-              )}
-              onClick={() => subCatClickHandler(t.id)}
+              className={classNames(styles.item, activeId ? "" : styles.active)}
             >
-              {/* {t.icon && (
-                <IonIcon icon={t.icon} slot="start" className={styles.icon} />
-              )} */}
-              <IonLabel className={styles.label}>{t.attributes.name}</IonLabel>
+              <IonLabel className={styles.label}>All</IonLabel>
             </li>
+          </Link>
+          {locales.map((t, i) => (
+            <Link key={i} href={getPath(t.id, t.attributes.code)}>
+              <li
+                className={classNames(
+                  styles.item,
+                  t.id === activeId ? styles.active : ""
+                )}
+              >
+                <span className={styles.label}>{t.attributes.name}</span>
+              </li>
+            </Link>
           ))}
         </ul>
       </div>
@@ -97,14 +100,10 @@ const ChipBar = ({ locales, activeId, subCatClickHandler }) => {
         )}
       >
         <button
-          className={styles.btn_icon} //
+          className={styles.btn_icon}
           onClick={() => handleScroll("right")}
         >
-          <IonIcon
-            icon={prevIcon} //
-            slot="start"
-            className={styles.icon}
-          />
+          <IonIcon icon={prevIcon} slot="start" className={styles.icon} />
         </button>
       </div>
       <div
@@ -118,14 +117,10 @@ const ChipBar = ({ locales, activeId, subCatClickHandler }) => {
         )}
       >
         <button
-          className={styles.btn_icon} //
+          className={styles.btn_icon}
           onClick={() => handleScroll("left")}
         >
-          <IonIcon
-            icon={nextIcon} //
-            slot="start"
-            className={styles.icon}
-          />
+          <IonIcon icon={nextIcon} slot="start" className={styles.icon} />
         </button>
       </div>
     </div>

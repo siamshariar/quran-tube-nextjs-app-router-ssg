@@ -1,5 +1,120 @@
-.tmpMsg {
-  padding: 24px 16px;
-  font-size: 18px;
-  text-align: center;
+.container {
+  padding-right: 4px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.content {
+  height: auto;
+}
+.divider {
+  width: 100%;
+  height: 0;
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin: 4px 0;
+}
+.title {
+  color: #606060;
+  display: block;
+  padding: 8px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.appstitle {
+  color: #606060;
+  display: block;
+  padding: 8px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* footer */
+.footer {
+}
+.links {
+  padding: 12px 24px 0;
+  line-height: 1;
+}
+.links a {
+  display: inline-block;
+  margin-right: 8px;
+  text-decoration: none;
+  color: #606060;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+}
+.copyright {
+  padding: 14px 24px;
+  color: #909090;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 400;
+}
+.copyright a {
+  text-decoration: none;
+}
+
+/* menu list */
+.list {
+}
+.item,
+.item::after {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.item.active {
+  --ion-item-background: rgba(0, 0, 0, 0.1);
+}
+.icon {
+  margin-right: 24px;
+  margin-left: 8px;
+  color: #303030;
+  font-size: 24px;
+}
+.label {
+  color: #030303 !important;
+  font-size: 14px !important;
+  line-height: 20px;
+  font-family: "Roboto", sans-serif !important;
+  font-weight: 400;
+}
+.item.active .label {
+  font-weight: 500;
+}
+
+/* custom scrollbar */
+@media screen and (min-width: 1024px) {
+  .container {
+    overflow-y: auto;
+  }
+  /* firefox */
+  .container {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .container:hover {
+    scrollbar-color: #909090 transparent;
+  }
+  /* chrome */
+  .container::-webkit-scrollbar {
+    width: 8px;
+  }
+  .container::-webkit-scrollbar-track {
+    box-shadow: none;
+  }
+  .container::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 10px;
+  }
+  .container:hover::-webkit-scrollbar-thumb {
+    background-color: #909090;
+  }
 }

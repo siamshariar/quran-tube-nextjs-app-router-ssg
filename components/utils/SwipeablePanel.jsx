@@ -1,6 +1,6 @@
 import styles from "./SwipeablePanel.module.css";
 import classNames from "classnames";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import { IonIcon } from "@ionic/react";
 import { close } from "../../icons";
 
@@ -10,9 +10,9 @@ const SwipeablePanel = ({ children, title, open, controller }) => {
   const containerRef = useRef(null);
   const backdropRef = useRef(null);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     controller(false);
-  };
+  }, [controller]);
 
   useEffect(() => {
     const headerInstance = headerRef.current;
@@ -38,17 +38,11 @@ const SwipeablePanel = ({ children, title, open, controller }) => {
       containerRef.current.style.transform = `translateY(${translate}px)`;
       backdropRef.current.style.opacity =
         1 - translate / panelRef.current.offsetHeight;
-
-      // if (currentY < tempCurrentY) {
-      //   console.log("Move down", currentY, translate);
-      // } else {
-      //   console.log("Move up", currentY, translate);
-      // }
     };
 
     const handleTouchEnd = () => {
       if (translate > panelRef.current.offsetHeight / 3) {
-        containerRef.current.style.transition = `transform 250ms ease`;
+        containerRef.current.style.transition = `transform 250ms ease, opacity 250ms ease`;
         backdropRef.current.style.transition = `opacity 250ms ease`;
 
         containerRef.current.style.transform = `translateY(100%)`;
@@ -63,7 +57,7 @@ const SwipeablePanel = ({ children, title, open, controller }) => {
           backdropRef.current.style.opacity = 1;
         }, 250);
       } else {
-        containerRef.current.style.transition = `transform 250ms ease`;
+        containerRef.current.style.transition = `transform 250ms ease, opacity 250ms ease`;
         backdropRef.current.style.transition = `opacity 250ms ease`;
 
         containerRef.current.style.transform = `translateY(0px)`;
@@ -75,7 +69,6 @@ const SwipeablePanel = ({ children, title, open, controller }) => {
           backdropRef.current.style.transition = "unset";
         }, 250);
       }
-      console.log("touch end");
     };
 
     headerInstance.addEventListener("touchstart", handleTouchStart);
@@ -87,7 +80,7 @@ const SwipeablePanel = ({ children, title, open, controller }) => {
       headerInstance.removeEventListener("touchmove", handleTouchMove);
       headerInstance.removeEventListener("touchend", handleTouchEnd);
     };
-  }, []);
+  }, [handleClose]); // Added handleClose to the dependency array
 
   return (
     <div
@@ -104,7 +97,7 @@ const SwipeablePanel = ({ children, title, open, controller }) => {
               icon={close}
               slot="start"
               className={styles.icon}
-              onClick={() => handleClose()}
+              onClick={handleClose} // Use handleClose directly
             />
           </div>
         </div>

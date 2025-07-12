@@ -21,23 +21,30 @@ import MenuClickModal from "../pages/modal/MenuClickModal";
 const pages = [
   {
     title: "Home",
-    icon: home,
-    iconOutline: homeOutline,
+    icon: "/icons/home-icon.svg",
+    iconOutline: "/icons/home-icon.svg",
     url: "/",
     linkType: "internal",
   },
   {
-    title: "Translations",
-    icon: captivePortal,
-    iconOutline: captivePortal,
-    url: "/quran-translations",
+    title: "Shorts",
+    icon: "/icons/shorts-icon.svg",
+    iconOutline: "/icons/shorts-icon.svg",
+    url: "/shorts",
     linkType: "internal",
   },
   {
-    title: "Learn Quran",
-    icon: historyEdu,
-    iconOutline: historyEdu,
-    url: "/learn-quran",
+    title: "Taraweeh",
+    icon: "/icons/taraweeh.svg",
+    iconOutline: "/icons/taraweeh.svg",
+    url: "/taraweeh",
+    linkType: "internal",
+  },
+  {
+    title: "Translations",
+    icon: "/icons/translate-icon.svg",
+    iconOutline: "/icons/translate-icon.svg",
+    url: "/quran-translations",
     linkType: "internal",
   },
   {
@@ -111,23 +118,32 @@ const BottomNav = () => {
               </div>
             )}
             {p.linkType == "internal" && (
-              <IonRouterLink
-                routerLink={p.url}
-                routerDirection="none"
-                detail={false}
-                lines="none"
-                key={i}
-                className={styles.item}
-              >
-                <div className={styles.inner}>
-                  <IonIcon
-                    icon={p.url === path ? p.icon : p.iconOutline}
-                    slot="start"
-                    className={styles.icon}
-                  />
-                  <IonLabel className={styles.label}>{p.title}</IonLabel>
-                </div>
-              </IonRouterLink>
+                <IonRouterLink
+                    routerLink={p.url}
+                    routerDirection="none"
+                    detail={false}
+                    lines="none"
+                    key={i}
+                    className={styles.item}
+                >
+                  <div
+                      className={classNames(
+                          styles.inner,
+                          p.url === "/"
+                              ? (p.url === path || path.includes("home") ? styles.active : "")
+                              : p.url === "/taraweeh"
+                                  ? (p.url === path || path.includes("taraweeh") ? styles.active : "")
+                                  : (p.url === path ? styles.active : "")
+                      )}
+                  >
+                    <IonIcon
+                        icon={p.url === path ? p.icon : p.iconOutline}
+                        slot="start"
+                        className={styles.icon}
+                    />
+                    <IonLabel className={styles.label}>{p.title}</IonLabel>
+                  </div>
+                </IonRouterLink>
             )}
           </>
         ))}

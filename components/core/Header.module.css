@@ -14,8 +14,19 @@
 }
 .start {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
+}
+.MuiPaper-root{
+  left: 400px;
+}
+.icon {
+  margin-top: 5px;
+  margin-left: 10px;
+}
+.text {
+  margin-left: 10px;
+  font-size: 16px;
 }
 .btn {
   width: 48px;
@@ -24,26 +35,57 @@
   justify-content: center;
   align-items: center;
 }
+
+.logo img {
+  width: 100%;
+  height: auto;
+}
+
+
+/* Header.module.css */
+
+.menu {
+  background-color: white; /* Background color */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15); /* Shadow effect */
+  /* Additional styles */
+}
+
+.menu li {
+  padding: 0 5px;
+}
+
+.popover {
+  padding: 10px; /* Inner padding */
+  min-width: 200px; /* Minimum width */
+  /* Add any other styles you want */
+}
+
+
+
+
+
 .menu_btn {
   display: none;
 }
 .icon {
   font-size: 24px;
 }
-.layout2 .icon {
-  color: #fff;
+.layout2 {
+ 
 }
 .logo {
   margin-left: 0;
 }
 .logo img {
-  width: 150px;
-  height: auto;
+  
 }
 .layout2 .logo svg {
   fill: #fff;
 }
 .center {
+  width: 300%;
+  align-items: center;
 }
 .search {
   display: none;
@@ -146,6 +188,14 @@
   -webkit-text-fill-color: #030303 !important;
 } */
 
+@media screen and (min-width: 668px) {
+  .logo img {
+    width: 80%;
+  }
+
+}
+
+
 @media screen and (min-width: 1024px) {
   .wrapper {
     height: 56px;
@@ -163,11 +213,14 @@
   .logo {
     margin-left: 8px;
   }
+  .logo img {
+    width: 65%;
+    height: auto;
+  }
   .search {
     display: flex;
     align-items: center;
-    width: 600px;
-    justify-content: flex-end;
+    justify-content: center;
   }
   .input {
     border: 1px solid #ccc;
@@ -180,6 +233,7 @@
   .input.focus {
     border-color: #0000ff;
   }
+  
   .s_hidden_icon {
     font-size: 20px;
     width: 20px;
@@ -207,6 +261,7 @@
     width: 500px;
     padding: 0 10px;
     line-height: 38px;
+    padding-right: 40px;
   }
   .s_submit {
     width: 64px;

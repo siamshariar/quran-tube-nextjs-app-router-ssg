@@ -1,10 +1,11 @@
 import classNames from "classnames";
-import styles from "./Video3.module.css";
+import styles from "./Video.module.css";
 import { server } from "../../lib/config";
 import { format } from "../../lib/format";
 import { IonRouterLink, IonIcon } from "@ionic/react";
 import { ellipsisVertical } from "../../icons";
 import { useRef, useEffect } from "react";
+import Image from "next/image";
 import {
   PopupStore,
   setPopupOpen,
@@ -50,13 +51,17 @@ const VideoCard = ({
               routerLink={`/watch/${id}`} //
               className={styles.thumb}
             >
-              <img
+              <Image
+                unoptimized
                 src={
                   image
                     ? `https://i.ytimg.com/vi/${id}/mqdefault.jpg`
                     : `${server}/img/youtube/youtube-default.jpg`
                 }
-                alt=""
+                alt="YouTube Thumbnail"  
+                width={320}  
+                height={180} 
+                layout="responsive"  
               />
             </IonRouterLink>
 
@@ -91,12 +96,19 @@ const VideoCard = ({
                       rel="noreferrer"
                       className={styles.avatar}
                     >
-                      <img
+                      <Image
+                        unoptimized
                         src={
-                          channelThumbnails ? channelThumbnails[channelId] : ""
-                        } //
-                        alt=""
+                          channelThumbnails && channelThumbnails[channelId] 
+                            ? channelThumbnails[channelId] 
+                            : "/path/to/placeholder.jpg"  
+                        }
+                        alt="Channel Thumbnail" 
+                        width={100}   
+                        height={100}  
+                        layout="fixed"  
                       />
+
                     </a>
                     <span>{channelTitle}</span>
                   </div>

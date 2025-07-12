@@ -5,6 +5,7 @@ import { format } from "../../lib/format";
 import { IonRouterLink, IonIcon } from "@ionic/react";
 import { ellipsisVertical } from "../../icons";
 import { useRef, useEffect } from "react";
+import Image from "next/image";
 import {
   PopupStore,
   setPopupOpen,
@@ -50,13 +51,17 @@ const VideoCard = ({
               routerLink={`/watch/${id}`} //
               className={styles.thumb}
             >
-              <img
+              <Image
+                unoptimized
                 src={
                   image
                     ? `https://i.ytimg.com/vi/${id}/mqdefault.jpg`
                     : `${server}/img/youtube/youtube-default.jpg`
                 }
-                alt=""
+                alt="Thumbnail" 
+                width={320}  
+                height={180} 
+                layout="responsive" 
               />
             </IonRouterLink>
 
@@ -67,9 +72,13 @@ const VideoCard = ({
                 rel="noreferrer"
                 className={styles.avatar}
               >
-                <img
-                  src={channelThumbnails ? channelThumbnails[channelId] : ""} //
-                  alt=""
+                <Image
+                  unoptimized
+                  src={channelThumbnails ? channelThumbnails[channelId] : "/path/to/placeholder.jpg"} 
+                  alt="Channel Thumbnail"  
+                  width={100}  
+                  height={100} 
+                  layout="fixed"  
                 />
               </a>
 

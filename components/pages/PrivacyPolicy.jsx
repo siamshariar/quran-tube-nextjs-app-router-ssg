@@ -3,11 +3,10 @@ import Meta from "../core/Meta";
 import {server } from "../../lib/config";
 
 const PrivacyPolicy = () => {
-
   return (
     <>
       <Meta
-        title="Privacy Policy"
+        title="Privacy Policy | Quran Tube"
         description="Privacy Policy"
         url={server}
         image={`${server}/img/logo/default_share.png`}

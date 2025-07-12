@@ -32,3 +32,55 @@
   font-family: Arial, "Roboto", sans-serif !important;
   font-weight: 400;
 }
+
+.inner.active .label {
+  font-weight: 600;
+}
+
+.btn2 {
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: rotate(225deg); /* Rotate by 45 degrees */
+  padding: 0;
+  margin-bottom: 3px;
+  color: #747474;
+}
+
+.icon{
+  /*margin-top: 10px;*/
+  color: #1A876D;
+}
+.text{
+  margin-left: 20px;
+  margin-top: 5px;
+}
+.border {
+
+  border-bottom: 1px dashed black;
+  width: 100%;
+}
+
+
+.css-3bmhjh-MuiPaper-root-MuiPopover-paper{
+  top: 200px;
+}
+
+.right {
+    height: 2px;
+    width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+    margin-bottom: 2px;
+    margin-right: 10px;
+}
+
+.ptitle{
+  font-size: 11px;
+  margin-top: 2px;
+
+}

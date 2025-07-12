@@ -1,0 +1,84 @@
+
+.modalOverlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  opacity: 0;
+}
+
+.modalContent {
+  transform: translateY(100%);
+}
+
+.slideUp {
+  animation: slideUp 0.3s forwards;
+}
+
+.slideUpContent {
+  animation: slideUpContent 0.3s forwards;
+}
+
+.slideDown {
+  animation: slideDown 0.3s forwards;
+}
+
+.slideDownContent {
+  animation: slideDownContent 0.3s forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpContent {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slideDownContent {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+.noScrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.noScrollbar::-webkit-scrollbar {
+  display: none; 
+}
+
+.scrollable {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.selected {
+  color: #14b8a6; 
+  font-weight: bold;
+}
