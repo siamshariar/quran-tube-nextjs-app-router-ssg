@@ -138,7 +138,7 @@ const VideoCard = ({ handleClick, attributes, isModalOpen, isShorts, pathname, u
                   }
                 }}
               >
-                {!isShorts && (
+                {!isShorts && attributes.sourceLogoUrl && (
                   <div className={classNames(styles.avatar, { [styles.disabled]: isModalOpen })}>
                       {/*<img*/}
                       {/*    src={attributes.sourceLogoUrl || ""}*/}
@@ -148,7 +148,7 @@ const VideoCard = ({ handleClick, attributes, isModalOpen, isShorts, pathname, u
                       {/*/>*/}
                       <Image
                           unoptimized
-                          src={attributes.sourceLogoUrl ? attributes.sourceLogoUrl.replace("s240", "s68").replace("s176", "s68").replace("s100", "s68") : ""}
+                          src={attributes.sourceLogoUrl.replace("s240", "s68").replace("s176", "s68").replace("s100", "s68")}
                           alt="Thumbnail"
                           width={50}
                           height={50}
