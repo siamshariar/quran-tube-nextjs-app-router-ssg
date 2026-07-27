@@ -25,6 +25,7 @@ import TaraweehMaqqa from "./pages/TaraweehMaqqa";
 import TaraweehMadinah from "./pages/TaraweehMadinah";
 import Favorites from "./pages/Favorites";
 import Recents from "./pages/Recents";
+import { loadFavoriteVideos } from "../store/FavoriteVideosStore";
 
 window
   .matchMedia("(prefers-color-scheme: dark)")
@@ -38,6 +39,10 @@ window
 
 const App = () => {
   const pathname = window.location.pathname;
+
+  useEffect(() => {
+    loadFavoriteVideos();
+  }, []);
 
   useEffect(() => {
     if (isMobile || isTablet) {

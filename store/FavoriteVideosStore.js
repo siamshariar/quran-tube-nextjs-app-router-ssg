@@ -12,6 +12,7 @@ export const loadFavoriteVideos = async () => {
     FavoriteVideosStore.update(s => {
       s.favoriteVideos = favoriteVideos;
     });
+    window.dispatchEvent(new CustomEvent("favoritesUpdated"));
   } catch (error) {
     console.error("Error loading videos from storage", error);
   }
