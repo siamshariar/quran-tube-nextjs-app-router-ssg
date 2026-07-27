@@ -26,6 +26,7 @@ const Recents = () => {
   });
   const [isVideosLoaded, setIsVideosLoaded] = useState(false);
   const router = useRouter();
+  const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
   useEffect(() => {
     const loadVideos = async () => {
@@ -254,6 +255,7 @@ const Recents = () => {
         videoType={modalData.videoType}
         attributes={modalData.attributes} // Pass the attributes to PlayerModal
         fullUrl={modalData.fullUrl}
+        isIOS={isIOS}
       />
     </>
   );

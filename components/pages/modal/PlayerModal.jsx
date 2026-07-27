@@ -147,7 +147,7 @@ export default function PlayerModal({
   };
 
   const onEnd = (e) => {
-    if (player) {
+    if (player && open) {
       player.playVideo();
     }
   };
@@ -163,10 +163,11 @@ export default function PlayerModal({
 
     setTimerDuration(null);
     setResumingTime(null);
+    setCurrentVideoId(null);
     setPlayer(null);
     setIsInitialVideo(true);
     handleClose();
-    closer(); 
+    closer();
     setIsTimerModalOpen(false);
     setIsTimerSet(false);
   };
