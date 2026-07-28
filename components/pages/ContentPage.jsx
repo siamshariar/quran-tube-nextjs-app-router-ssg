@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { usePathname } from "next/navigation";
 import { server, constants } from "../../lib/config";
 import PlayerModal from "./modal/PlayerModal";
 import Meta from "../core/Meta";
@@ -17,7 +18,11 @@ import {getVideosDataByUrl} from "../../lib/fetch";
 import { Virtuoso } from "react-virtuoso"
 
 export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription, isDisplayLocalizationChipBar, isShorts, taraweehPage }) {
-    const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+    // usePathname() (unlike window.location.pathname) resolves to the real route
+    // both during SSG/SSR and on the client, so the initial activeSubCat below
+    // matches between server-rendered HTML and hydration -- no mismatch, no
+    // "All" flash on hard reload.
+    const pathname = usePathname();
     const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
     const containerRef = useRef(null);
     const defaultMetaImage = `${server}/img/logo/default_share.png`;
@@ -33,7 +38,19 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
         metaTitle: null,
         metaUrl: null,
     });
-    const [activeSubCat, setActiveSubCat] = useState();
+    const [activeSubCat, setActiveSubCat] = useState(() => {
+        // Derived from `pathname` (from usePathname(), not window.location),
+        // so this computes the same value during SSR/SSG and client
+        // hydration -- the correct locale chip is already active in the
+        // server-rendered/static HTML, with no post-mount correction needed.
+        const segments = pathname.split("/").filter(Boolean);
+        const localizationCode = segments.length === 2 ? segments[1] : null;
+        if (!localizationCode) return null;
+        const activeLocale = localizationData.data.find(
+            (locale) => locale.attributes.code === localizationCode
+        );
+        return activeLocale ? activeLocale.id : null;
+    });
     const [searchParam, setSearchParam] = useState();
     const [metaTitle, setMetaTitle] = useState();
     const [metaUrl, setMetaUrl] = useState();
