@@ -1,8 +1,10 @@
-import styles from "./MiniNav.module.css";
-import { useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+"use client";
 
-import { IonIcon, IonRouterLink, IonLabel, IonList } from "@ionic/react";
+import styles from "./MiniNav.module.css";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+
+import { IonIcon, IonLabel, IonList } from "@ionic/react";
 
 import {
   home,
@@ -52,12 +54,7 @@ const pages = [
 ];
 
 const MiniNav = () => {
-  const location = useLocation();
-  const [path, setPath] = useState("/");
-
-  useEffect(() => {
-    setPath(location.pathname);
-  }, [location]);
+  const path = usePathname();
 
   const [modalOpen, setModalOpen] = useState(false);
   const handleModalClose = () => {

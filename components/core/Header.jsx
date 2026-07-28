@@ -1,4 +1,6 @@
-import {useHistory, useLocation} from "react-router-dom";
+"use client";
+
+import { usePathname, useSearchParams } from "next/navigation";
 import styles from "./Header.module.css";
 import classNames from "classnames";
 import Link from "next/link";
@@ -11,15 +13,13 @@ import Popover from "@mui/material/Popover";
 import {arrowLeft, close, donate, mobileApp, searchOutline, share} from "../../icons"; // Import icons directly
 import {useEffect, useRef, useState} from "react";
 import {informationCircleOutline} from "ionicons/icons";
-import { IonIcon, IonRouterLink } from "@ionic/react";
-import {useRouter} from "next/router";
+import { IonIcon } from "@ionic/react";
 import ShareModal from "../pages/modal/share-modal";
 import {isMobile, isTablet, isBrowser} from 'react-device-detect';
 
-const Header = ({ controller }) => {
-  const router = useRouter();
-  const location = useLocation();
-  const history = useHistory();
+const Header = () => {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const inputWrapper = useRef(null);
   const hiddenIcon = useRef(null);
   const closeIcon = useRef(null);
@@ -39,20 +39,19 @@ const Header = ({ controller }) => {
 
 
   useEffect(() => {
-    setPath(location.pathname);
-    setLayout(location.pathname === "/" ? "layout1" : "layout2");
-  }, [location]);
+    setPath(pathname);
+    setLayout(pathname === "/" ? "layout1" : "layout2");
+  }, [pathname]);
 
 
   useEffect(() => {
     // Clear search input when navigating away from the search page
-    if (!location.pathname.includes("/search")) {
+    if (!pathname.includes("/search")) {
       setKey("");
     } else {
-        const search = new URLSearchParams(location.search);
-        setKey(search.get("s") || "");
+      setKey(searchParams.get("s") || "");
     }
-  }, [location]);
+  }, [pathname, searchParams]);
 
   const handleFocusIn = () => {
     inputWrapper.current.classList.add(styles.focus);
@@ -145,21 +144,14 @@ const Header = ({ controller }) => {
     <div className={classNames(styles.wrapper, styles[layout])}>
       <div className={styles.container}>
         <div className={styles.start}>
-          <IonRouterLink
-              routerLink="/"
-              routerDirection="none"
-              detail={false}
-              lines="none"
-          >
+          <Link href="/">
             <div className={styles.logo} style={{cursor: `pointer`}}>
               <img
                 src="/img/logo/Quran-Tube.png"
                 alt="Quran Tube Logo"
-                
-                layout="fixed"
               />
             </div>
-          </IonRouterLink>
+          </Link>
         </div>
 
         <div className={styles.center}>
@@ -319,20 +311,14 @@ const Header = ({ controller }) => {
                           <span className={styles.text}>Install App</span>
                         </MenuItem>
                       </Link>
-                      <IonRouterLink
-                          routerLink="/about"
-                          routerDirection="none"
-                          detail={false}
-                          lines="none"
-                          style={{color: '#000000'}}
-                      >
+                      <Link href="/about" style={{color: '#000000'}}>
                         <MenuItem onClick={handleClose}>
                       <span className={styles.icon}>
                         <IonIcon icon={informationCircleOutline} slot="start" />
                       </span>
                           <span className={styles.text}>About</span>
                         </MenuItem>
-                      </IonRouterLink>
+                      </Link>
                     </>
                 )}
 

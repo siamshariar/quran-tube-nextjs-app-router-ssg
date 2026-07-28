@@ -1,7 +1,9 @@
+"use client";
+
 import styles from "./ChipBar.module.css";
 import classNames from "classnames";
 import {useEffect, useRef, useState} from "react";
-import {useRouter} from "next/router";
+import {useRouter} from "next/navigation";
 import {IonIcon, IonLabel} from "@ionic/react";
 import {next as nextIcon, previous as prevIcon} from "../../icons";
 import localizationData from '../../public/pagemenudata.json';
@@ -55,7 +57,7 @@ const ChipBar = ({ activeId, subCatClickHandler, pathname }) => {
     firstPathSegment = id !== null && firstPathSegment === "/" ? "/home" : firstPathSegment
     const path = id === null ? firstPathSegment : `${firstPathSegment}/${encodeURIComponent(code)}`;
     subCatClickHandler(id, code); // Call the handler to update activeId or other state
-    router.push(`${path}`, undefined, { shallow: true }); // Update URL without page reload
+    router.push(`${path}`); // Update URL without page reload
   };
 
   const getPath = (id, code) => {

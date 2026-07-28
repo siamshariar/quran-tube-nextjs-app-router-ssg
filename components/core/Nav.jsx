@@ -1,9 +1,12 @@
+"use client";
+
 import styles from "./Nav.module.css";
 import classNames from "classnames";
-import { useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { useState } from "react";
 
-import { IonIcon, IonLabel, IonRouterLink } from "@ionic/react";
+import { IonIcon, IonLabel } from "@ionic/react";
 
 import {
   home,
@@ -221,20 +224,14 @@ const Nav = () => {
 };
 
 const MenuList = ({ pages, openModal }) => {
-  const location = useLocation();
-  const [path, setPath] = useState("/");
-
-  useEffect(() => {
-    setPath(location.pathname);
-  }, [location]);
+  const path = usePathname();
 
   return (
     <div className={styles.list}>
       {pages.map((p, i) => (
-        <>
+        <div key={i}>
           {p.linkType == "inProgress" && (
             <div
-              key={i}
               className={classNames(
                 styles.item,
                 p.url === path ? styles.active : ""
@@ -250,15 +247,8 @@ const MenuList = ({ pages, openModal }) => {
             </div>
           )}
           {p.linkType == "internal" && (
-            <IonRouterLink
-              routerLink={p.url}
-              routerDirection="none"
-              detail={false}
-              lines="none"
-              key={i}
-            >
+            <Link href={p.url}>
               <div
-                key={i}
                 className={classNames(
                   styles.item,
                   p.url === "/"
@@ -275,10 +265,10 @@ const MenuList = ({ pages, openModal }) => {
                 />
                 <IonLabel className={styles.label}>{p.title}</IonLabel>
               </div>
-            </IonRouterLink>
+            </Link>
           )}
           {p.linkType == "external" && (
-            <a key={i} href={p.url} target="_blank" rel="noreferrer">
+            <a href={p.url} target="_blank" rel="noreferrer">
               <div className={classNames(styles.item)}>
                 <IonIcon
                   icon={p.iconOutline}
@@ -289,7 +279,7 @@ const MenuList = ({ pages, openModal }) => {
               </div>
             </a>
           )}
-        </>
+        </div>
       ))}
     </div>
   );

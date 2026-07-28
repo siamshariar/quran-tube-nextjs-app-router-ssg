@@ -1,8 +1,10 @@
+"use client";
+
 import styles from "./ChipBar.module.css";
 import classNames from "classnames";
 import {useEffect, useRef, useState} from "react";
-import {useRouter} from "next/router";
-import {IonIcon, IonLabel, IonRouterLink} from "@ionic/react";
+import {useRouter} from "next/navigation";
+import {IonIcon, IonLabel} from "@ionic/react";
 import {next as nextIcon, previous as prevIcon} from "../../icons";
 import localizationData from '../../public/pagemenudata.json';
 import Link from "next/link";
@@ -55,7 +57,7 @@ const ChipBarTaraweeh = ({ activeId, subCatClickHandler, pathname, taraweehPage 
     firstPathSegment = id !== null && firstPathSegment === "/" ? "/home" : firstPathSegment
     const path = id === null ? firstPathSegment : `${firstPathSegment}/${encodeURIComponent(code)}`;
     subCatClickHandler(id, code); // Call the handler to update activeId or other state
-    router.push(`${path}`, undefined, { shallow: true }); // Update URL without page reload
+    router.push(`${path}`); // Update URL without page reload
   };
 
   const getPath = (id, code) => {
@@ -71,45 +73,27 @@ const ChipBarTaraweeh = ({ activeId, subCatClickHandler, pathname, taraweehPage 
     <div className={styles.wrapper}>
       <div className={styles.content} ref={containerRef}>
         <ul className={styles.list} ref={contentRef}>
-          <IonRouterLink
-              routerLink="/taraweeh"
-              routerDirection="none"
-              detail={false}
-              lines="none"
-              key={1}
-          >
+          <Link href="/taraweeh">
             <li
                 className={classNames(styles.item, taraweehPage === "taraweeh" ? styles.active : "")}
             >
               <IonLabel className={styles.label}>All</IonLabel>
             </li>
-          </IonRouterLink>
-          <IonRouterLink
-              routerLink="/taraweeh-maqqa"
-              routerDirection="none"
-              detail={false}
-              lines="none"
-              key={1}
-          >
+          </Link>
+          <Link href="/taraweeh-maqqa">
             <li
                 className={classNames(styles.item, taraweehPage === "taraweeh-maqqa" ? styles.active : "")}
             >
               <IonLabel className={styles.label}>Maqqa</IonLabel>
             </li>
-          </IonRouterLink>
-          <IonRouterLink
-              routerLink="/taraweeh-madinah"
-              routerDirection="none"
-              detail={false}
-              lines="none"
-              key={1}
-          >
+          </Link>
+          <Link href="/taraweeh-madinah">
             <li
                 className={classNames(styles.item, taraweehPage === "taraweeh-madinah" ? styles.active : "")}
             >
               <IonLabel className={styles.label}>Madinah</IonLabel>
             </li>
-          </IonRouterLink>
+          </Link>
         </ul>
       </div>
       <div
