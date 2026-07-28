@@ -51,22 +51,25 @@ const ChipBar = ({ activeId, subCatClickHandler, pathname }) => {
     }
   }, [scrollLeft, containerWidth, contentWidth]);
 
+  const buildPath = (id, code) => {
+    let firstPathSegment = pathname.split("/")[1] || "";
+    firstPathSegment = id === null && firstPathSegment === "home" ? "" : firstPathSegment;
+    firstPathSegment = id !== null && firstPathSegment === "" ? "home" : firstPathSegment;
+    if (id === null) {
+      return firstPathSegment ? `/${firstPathSegment}` : "/";
+    }
+    return `/${firstPathSegment}/${encodeURIComponent(code)}`;
+  };
+
   const handleItemClick = (id, code) => {
-    let firstPathSegment = pathname.split("/")[1] || "/";
-    firstPathSegment = id === null && firstPathSegment === "home" ? "/" : firstPathSegment
-    firstPathSegment = id !== null && firstPathSegment === "/" ? "/home" : firstPathSegment
-    const path = id === null ? firstPathSegment : `${firstPathSegment}/${encodeURIComponent(code)}`;
+    const path = buildPath(id, code);
     subCatClickHandler(id, code); // Call the handler to update activeId or other state
-    router.push(`${path}`); // Update URL without page reload
+    router.push(path); // Update URL without page reload
   };
 
   const getPath = (id, code) => {
-    // debugger;
-    let firstPathSegment = pathname.split("/")[1] || "/";
-    firstPathSegment = id === null && firstPathSegment === "home" ? "/" : firstPathSegment
-    firstPathSegment = id !== null && firstPathSegment === "/" ? "/home" : firstPathSegment
-    const seg = id === null ? firstPathSegment : `${firstPathSegment}/${encodeURIComponent(code)}`;
-    return !seg.split("/")[1] && seg.length > 1 ? seg+"?t=all" : seg;
+    const seg = buildPath(id, code);
+    return seg !== "/" && !seg.split("/")[2] ? seg + "?t=all" : seg;
   };
 
   return (
