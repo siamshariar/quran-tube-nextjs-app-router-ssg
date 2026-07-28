@@ -52,7 +52,7 @@ export const setMiniPlayer = (obj) => {
 // popup
 export const PopupStore = new PullStateStore({
   open: false,
-  reference: document.body,
+  reference: typeof document !== "undefined" ? document.body : null,
   videoId: null,
 });
 
@@ -77,7 +77,7 @@ export const setPopupVideoId = (videoId) => {
 // preview
 export const PreviewStore = new PullStateStore({
   open: false,
-  reference: document.body,
+  reference: typeof document !== "undefined" ? document.body : null,
   video: {
     id: null,
     image: null,
@@ -88,7 +88,7 @@ export const PreviewStore = new PullStateStore({
     statistics: null,
     channelThumbnails: null,
   },
-  container: document.body,
+  container: typeof document !== "undefined" ? document.body : null,
 });
 
 export const setPreviewOpen = (open) => {

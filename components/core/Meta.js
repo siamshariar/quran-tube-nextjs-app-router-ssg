@@ -1,8 +1,21 @@
+"use client";
+
 // import Head from "next/head"; // Using Helmet instead of Head
+import { useEffect, useState } from "react";
 import { server } from "../../lib/config";
 import { Helmet } from 'react-helmet';
 
 export default function Meta(props) {
+    // react-helmet touches `document` during render, which doesn't exist
+    // during Next.js's server-side prerender of this client component.
+    // Real crawlable metadata now comes from each route's generateMetadata;
+    // Helmet only needs to run once mounted in the browser, for the
+    // dynamic per-video title/OG updates while the player modal is open.
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const domain = server || "https://www.quran.tube";
     const commonTitle = "Quran.tube";
     const title = props.title !== "" ? props.title + " | " + commonTitle : "Quran Tube | " + commonTitle;
@@ -10,6 +23,9 @@ export default function Meta(props) {
     const imageUrl = props.imageUrl || `${domain}/img/logo/default_share.png`;
     const pageUrl = props.url || domain;
     const statusBarColor = (props.statusBarColor !== null || props.statusBarColor !== "") ? props.statusBarColor : "#ffffff";
+
+    if (!mounted) return null;
+
     return (
     <Helmet>
       <meta charSet="utf-8" />

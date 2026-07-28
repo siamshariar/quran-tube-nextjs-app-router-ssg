@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { server, constants } from "../../lib/config";
 import PlayerModal from "./modal/PlayerModal";
@@ -15,8 +17,8 @@ import {getVideosDataByUrl} from "../../lib/fetch";
 import { Virtuoso } from "react-virtuoso"
 
 export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription, isDisplayLocalizationChipBar, isShorts, taraweehPage }) {
-    const pathname = window.location.pathname;
-    const params = new URLSearchParams(window.location.search);
+    const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+    const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
     const containerRef = useRef(null);
     const defaultMetaImage = `${server}/img/logo/default_share.png`;
     const defaultMetaStatusBarColor = "#ffffff";
@@ -44,8 +46,8 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
     });
     const [isFirstLoad, setIsFirstLoad] = useState(true);
     const initLocales = localizationData.data;
-    const [isOnline, setIsOnline] = useState(navigator.onLine);
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+    const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const [toDateParam, setToDateParam] = useState(null);
     const [fromDateParam, setFromDateParam] = useState(null);
     const virtuosoRef = useRef(null);

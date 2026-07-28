@@ -1,3 +1,5 @@
+"use client";
+
 import { constants } from "../../lib/config";
 import ContentPage from "./ContentPage";
 

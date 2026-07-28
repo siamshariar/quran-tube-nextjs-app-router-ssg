@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { usePathname } from "next/navigation";
 import { IonPage } from "@ionic/react";
 import classNames from "classnames";
@@ -76,7 +76,9 @@ const Layout = ({ children }) => {
       <Popup />
       <div className={classNames(styles.wrapper, styles.type1)} ref={wrapper}>
         <div className={classNames(styles.topbar, "header")}>
-          <Header />
+          <Suspense fallback={null}>
+            <Header />
+          </Suspense>
         </div>
 
         <div
@@ -99,6 +101,7 @@ const Layout = ({ children }) => {
         </div>
 
         <div
+          id="main"
           className={classNames(styles.container, isMini ? styles.mini : "")}
           ref={container}
         >

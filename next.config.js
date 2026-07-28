@@ -13,4 +13,13 @@ module.exports = withPWA({
         ? process.env.L_BASE_URL
         : "https://www.quran.tube",
   },
+  async rewrites() {
+    return [
+      // "/_offline" can't be a real app/ route folder name (Next.js treats
+      // leading-underscore folders as private, excluded from routing), so
+      // the page lives at app/offline-page and is rewritten back to the
+      // original URL to keep it identical to the pre-migration app.
+      { source: "/_offline", destination: "/offline-page" },
+    ];
+  },
 });

@@ -1,5 +1,6 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
 import RecentCard from "../cards/RecentCard";
 import PlayerModal from "./modal/PlayerModal";
 import Meta from "../core/Meta";
@@ -25,7 +26,6 @@ const Recents = () => {
     fullUrl: null,
   });
   const [isVideosLoaded, setIsVideosLoaded] = useState(false);
-  const router = useRouter();
   const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
   useEffect(() => {
@@ -155,7 +155,7 @@ const Recents = () => {
     return grouped;
   };
 
-  const urlParams = new URLSearchParams(window.location.search); 
+  const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
   const grouped = groupVideosByDate(recentVideos);
 
   const noRecentVideos = recentVideos.length === 0;

@@ -1,5 +1,6 @@
+"use client";
+
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/router";
 import FavoriteCard from "../cards/FavoriteCard";
 import styles from "./Favorites.module.css";
 import Meta from "../core/Meta";
@@ -30,7 +31,6 @@ const Favorites = () => {
     statusBarColor: "#ffffff",
   });
 
-  const router = useRouter();
   const handleFavoriteChange = (videoId, isFavorited) => {
     setFilteredFavorites(prev => {
       if (isFavorited) {

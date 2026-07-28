@@ -138,7 +138,7 @@ const pages2 = [
 ];
 
 const More = () => {
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const [modalOpen, setModalOpen] = useState(false);
   const handleModalClose = () => {
     setModalOpen(false);
