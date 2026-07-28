@@ -2,8 +2,16 @@ import Ruqyah from "../../components/pages/Ruqyah";
 
 export const metadata = {
   title: "Ruqyah | Quran Tube",
-  description:
-    "Discover the beauty of Quran recitations through videos with Quran.tube",
+  description: "Discover the beauty of Quran recitations through videos with Quran.tube",
+  openGraph: {
+    title: "Ruqyah | Quran Tube",
+    description: "Discover the beauty of Quran recitations through videos with Quran.tube",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ruqyah | Quran Tube",
+    description: "Discover the beauty of Quran recitations through videos with Quran.tube",
+  },
 };
 
 export default function Page() {

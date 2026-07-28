@@ -18,16 +18,32 @@ import { server } from "../lib/config";
 import { GA_TRACKING_ID } from "../lib/gtag";
 import AppShell from "../components/core/AppShell";
 
+const defaultDescription =
+  "Discover the beauty of Quran recitations through videos with Quran.tube. Whether looking for heartfelt recitations by renowned Reciters, exploring various styles, or seeking Quran translations, Quran.tube has it all.";
+
 export const metadata = {
   metadataBase: new URL(server),
   title: "Quran Tube",
-  description:
-    "Discover the beauty of Quran recitations through videos with Quran.tube. Whether looking for heartfelt recitations by renowned Reciters, exploring various styles, or seeking Quran translations, Quran.tube has it all.",
+  description: defaultDescription,
   icons: {
     icon: [
       { url: "/img/favicon/favicon.ico", sizes: "16x16" },
       { url: "/img/favicon/favicon-16x16.png", sizes: "16x16" },
     ],
+  },
+  openGraph: {
+    title: "Quran Tube",
+    description: defaultDescription,
+    url: server,
+    siteName: "Quran.tube",
+    images: [{ url: "/img/logo/default_share.png" }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Quran Tube",
+    description: defaultDescription,
+    images: ["/img/logo/default_share.png"],
   },
 };
 
