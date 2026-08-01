@@ -74,20 +74,6 @@ const pages1 = [
     iconOutline: "/icons/medina-icon.svg",
     url: "/madinah",
     linkType: "internal",
-  },
-  {
-    title: "Favorite",
-    icon: "/icons/favourites-icon.svg",
-    iconOutline: "/icons/favourites-icon.svg",
-    url: "/favorites",
-    linkType: "internal",
-  },
-  {
-    title: "Recents",
-    icon: "/icons/recents-icon.svg",
-    iconOutline: "/icons/recents-icon.svg",
-    url: "/recents",
-    linkType: "internal",
   }
   // {
   //   title: "Salah Recitations",
@@ -181,6 +167,23 @@ const More = () => {
     },
   ];
 
+  const pages4 = [
+  {
+    title: "Favorite",
+    icon: "/icons/favourites-icon.svg",
+    iconOutline: "/icons/favourites-icon.svg",
+    url: "/favorites",
+    linkType: "internal",
+  },
+  {
+    title: "Recents",
+    icon: "/icons/recents-icon.svg",
+    iconOutline: "/icons/recents-icon.svg",
+    url: "/recents",
+    linkType: "internal",
+  }
+];
+
   return (
     <>
       <div className={styles.container}>
@@ -191,8 +194,10 @@ const More = () => {
           {/*<MenuList pages={pages2} openModal={openModal} />*/}
           {/*<hr className={styles.divider} />*/}
 
-          <MenuList pages={pages3} openModal={openModal} />
+          <MenuList pages={pages4} openModal={openModal} />
           <hr className={styles.divider} />
+          
+          <MenuList pages={pages3} openModal={openModal} />
 
           <div className={styles.appstitle}>More Apps</div>
 

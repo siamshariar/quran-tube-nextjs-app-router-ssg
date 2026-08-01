@@ -1,18 +1,14 @@
 import Madinah from "../../components/pages/Madinah";
+import { buildContentMetadata } from "../../lib/videoShareMeta";
 
-export const metadata = {
-  title: "Madinah | Quran Tube",
-  description: "Discover the beauty of Quran recitations through videos with Quran.tube",
-  openGraph: {
-    title: "Madinah | Quran Tube",
+export async function generateMetadata({ searchParams }) {
+  return buildContentMetadata({
+    searchParams,
+    path: "/madinah",
+    fallbackTitle: "Madinah | Quran Tube",
     description: "Discover the beauty of Quran recitations through videos with Quran.tube",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Madinah | Quran Tube",
-    description: "Discover the beauty of Quran recitations through videos with Quran.tube",
-  },
-};
+  });
+}
 
 export default function Page() {
   return <Madinah />;

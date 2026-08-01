@@ -95,7 +95,11 @@ const BottomNav = () => {
               </div>
             )}
             {p.linkType == "internal" && (
-                <Link href={p.url} className={styles.item}>
+                <Link
+                    href={p.url}
+                    className={styles.item}
+                    aria-label={p.title === "More" ? "More options" : p.title}
+                >
                   <div
                       className={classNames(
                           styles.inner,

@@ -281,11 +281,7 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
             <div
               key={video.ytVideoId}
               className={`${isShorts ? styles.shortsItem : styles.item} ${styles.responsiveCard}`}
-              style={{
-                flex: `0 0 calc(${100 / getGroupSize()}% - 16px)`,
-                margin: "8px",
-                maxWidth: `calc(${100 / getGroupSize()}% - 16px)`,
-              }}
+
             >
               <VideoCard
                 attributes={video}

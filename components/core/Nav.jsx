@@ -101,21 +101,7 @@ const pages1 = [
     iconOutline: "/icons/medina-icon.svg",
     url: "/madinah",
     linkType: "internal",
-  },
-  {
-    title: "Favorites",
-    icon: "/icons/favourites-icon.svg",
-    iconOutline: "/icons/favourites-icon.svg",
-    url: "/favorites",
-    linkType: "internal",
-  },
-  {
-    title: "Recents",
-    icon: "/icons/recents-icon.svg",
-    iconOutline: "/icons/recents-icon.svg",
-    url: "/recents",
-    linkType: "internal",
-  },
+  }
   // {
   //   title: "Quran with Nature",
   //   icon: "/icons/quran-with-nature-icon.svg",
@@ -161,6 +147,23 @@ const pages3 = [
   },
 ];
 
+const pages4 = [
+  {
+    title: "Favorites",
+    icon: "/icons/favourites-icon.svg",
+    iconOutline: "/icons/favourites-icon.svg",
+    url: "/favorites",
+    linkType: "internal",
+  },
+  {
+    title: "Recents",
+    icon: "/icons/recents-icon.svg",
+    iconOutline: "/icons/recents-icon.svg",
+    url: "/recents",
+    linkType: "internal",
+  },
+];
+
 const Nav = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const handleModalClose = () => {
@@ -183,7 +186,7 @@ const Nav = () => {
 
           {/*<MenuList pages={pages3} openModal={openModal} />*/}
           {/*<hr className={styles.divider} />*/}
-
+          <MenuList pages={pages4} openModal={openModal} />
           <div className={styles.appstitle}>More Apps</div>
 
           <MenuList pages={pages2} openModal={openModal} />

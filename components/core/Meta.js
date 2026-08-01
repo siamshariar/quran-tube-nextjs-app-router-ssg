@@ -29,10 +29,9 @@ export default function Meta(props) {
     return (
     <Helmet>
       <meta charSet="utf-8" />
-      <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, uc-fitscreen=yes, viewport-fit=cover"
-      />
+      {/* Viewport is already set correctly (without user-scalable=no, which
+          disables pinch-zoom and fails WCAG 1.4.4) by app/layout.js's
+          `viewport` export -- don't re-declare a conflicting one here. */}
 
       <meta name="mobile-wep-app-capable" content="yes" />
       <meta name="apple-mobile-wep-app-capable" content="yes" />
