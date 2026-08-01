@@ -4,7 +4,7 @@ import styles from "./ChipBar.module.css";
 import classNames from "classnames";
 import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/navigation";
-import {IonIcon, IonLabel} from "@ionic/react";
+import {IonIcon} from "@ionic/react";
 import {next as nextIcon, previous as prevIcon} from "../../icons";
 import localizationData from '../../public/pagemenudata.json';
 import Link from "next/link";
@@ -72,15 +72,17 @@ const ChipBar = ({ activeId, subCatClickHandler, pathname }) => {
     return seg !== "/" && !seg.split("/")[2] ? seg + "?t=all" : seg;
   };
 
+  const isAllActive = activeId == null;
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.content} ref={containerRef}>
         <ul className={styles.list} ref={contentRef}>
           <Link href={getPath(null, 'all')}>
             <li
-              className={classNames(styles.item, activeId ? "" : styles.active)}
+              className={classNames(styles.item, isAllActive ? styles.active : "")}
             >
-              <IonLabel className={styles.label}>All</IonLabel>
+              <span className={styles.label}>All</span>
             </li>
           </Link>
           {locales.map((t, i) => (

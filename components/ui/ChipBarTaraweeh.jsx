@@ -4,7 +4,7 @@ import styles from "./ChipBar.module.css";
 import classNames from "classnames";
 import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/navigation";
-import {IonIcon, IonLabel} from "@ionic/react";
+import {IonIcon} from "@ionic/react";
 import {next as nextIcon, previous as prevIcon} from "../../icons";
 import localizationData from '../../public/pagemenudata.json';
 import Link from "next/link";
@@ -77,21 +77,21 @@ const ChipBarTaraweeh = ({ activeId, subCatClickHandler, pathname, taraweehPage 
             <li
                 className={classNames(styles.item, taraweehPage === "taraweeh" ? styles.active : "")}
             >
-              <IonLabel className={styles.label}>All</IonLabel>
+              <span className={styles.label}>All</span>
             </li>
           </Link>
           <Link href="/taraweeh-maqqa">
             <li
                 className={classNames(styles.item, taraweehPage === "taraweeh-maqqa" ? styles.active : "")}
             >
-              <IonLabel className={styles.label}>Maqqa</IonLabel>
+              <span className={styles.label}>Maqqa</span>
             </li>
           </Link>
           <Link href="/taraweeh-madinah">
             <li
                 className={classNames(styles.item, taraweehPage === "taraweeh-madinah" ? styles.active : "")}
             >
-              <IonLabel className={styles.label}>Madinah</IonLabel>
+              <span className={styles.label}>Madinah</span>
             </li>
           </Link>
         </ul>

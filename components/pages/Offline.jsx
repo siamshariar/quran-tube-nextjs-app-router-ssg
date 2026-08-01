@@ -1,7 +1,37 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Meta from "../core/Meta";
 import {server} from "../../lib/config";
 
 export default function OfflineContent() {
+  const router = useRouter();
+  const [isOnline, setIsOnline] = useState(true);
+
+  useEffect(() => {
+    const updateStatus = () => setIsOnline(navigator.onLine);
+
+    updateStatus();
+    window.addEventListener("online", updateStatus);
+    window.addEventListener("offline", updateStatus);
+
+    return () => {
+      window.removeEventListener("online", updateStatus);
+      window.removeEventListener("offline", updateStatus);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isOnline) {
+      router.replace("/");
+    }
+  }, [isOnline, router]);
+
+  if (isOnline) {
+    return null;
+  }
+
     return (
         <>
             <Meta
