@@ -14,6 +14,7 @@ import {arrowLeft, close, donate, mobileApp, searchOutline, share} from "../../i
 import {useEffect, useRef, useState} from "react";
 import {informationCircleOutline} from "ionicons/icons";
 import { IonIcon } from "@ionic/react";
+import InlineIcon from "./InlineIcon";
 import ShareModal from "../pages/modal/share-modal";
 import {isMobile, isTablet, isBrowser} from 'react-device-detect';
 
@@ -26,8 +27,7 @@ const Header = () => {
   const mobileSearch = useRef(null);
   const backdrop = useRef(null);
 
-  const [path, setPath] = useState("/");
-  const [layout, setLayout] = useState("layout1");
+  const layout = pathname === "/" ? "layout1" : "layout2";
   const [key, setKey] = useState("");
   const [sideNavOpen, setSidenavOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -36,12 +36,6 @@ const Header = () => {
 
   const isTab = UIStore.useState((s) => s.isTab);
   const isMiniNav = UIStore.useState((s) => s.isMiniNav);
-
-
-  useEffect(() => {
-    setPath(pathname);
-    setLayout(pathname === "/" ? "layout1" : "layout2");
-  }, [pathname]);
 
 
   useEffect(() => {
@@ -163,12 +157,12 @@ const Header = () => {
             onSubmit={handleSubmit}
           >
             <div className={styles.input} ref={inputWrapper}>
-              <IonIcon
-                icon={searchOutline}
-                slot="start"
+              <span
                 className={classNames(styles.s_hidden_icon, styles.hide)}
                 ref={hiddenIcon}
-              />
+              >
+                <InlineIcon icon={searchOutline} />
+              </span>
               <input
                 type="text"
                 name="s"
@@ -179,21 +173,17 @@ const Header = () => {
                 value={key}
                 ref={inputRef}
               />
-              <IonIcon
-                icon={close}
-                slot="start"
-                className={classNames(styles.s_close_icon)}
+              <span
+                className={styles.s_close_icon}
                 ref={closeIcon}
                 onClick={handleClear}
-              />
+              >
+                <InlineIcon icon={close} />
+              </span>
             </div>
 
             <button className={styles.s_submit} type="submit">
-              <IonIcon
-                icon={searchOutline}
-                slot="start"
-                className={styles.s_icon}
-              />
+              <InlineIcon icon={searchOutline} className={styles.s_icon} />
             </button>
           </form>
         </div>
@@ -211,11 +201,7 @@ const Header = () => {
               type="button"
               onClick={() => handleMobileSearch(false)}
             >
-              <IonIcon
-                icon={arrowLeft}
-                slot="start"
-                className={classNames(styles.back_icon)}
-              />
+              <InlineIcon icon={arrowLeft} className={styles.back_icon} />
             </button>
             <input
               type="text"
@@ -226,11 +212,7 @@ const Header = () => {
               ref={inputRef}
             />
             <button className={styles.m_search_icon} type="submit">
-              <IonIcon
-                icon={searchOutline}
-                slot="start"
-                className={styles.m_submit_icon}
-              />
+              <InlineIcon icon={searchOutline} className={styles.m_submit_icon} />
             </button>
           </form>
           <div
@@ -244,11 +226,9 @@ const Header = () => {
             className={classNames(styles.btn, styles.show_on_mobile)}
             onClick={() => handleMobileSearch(true)}
           >
-            <IonIcon
-              icon={searchOutline}
-              slot="start"
-              className={styles.icon}
-            />
+            <span className={styles.icon}>
+              <InlineIcon icon={searchOutline} />
+            </span>
           </button>
           {/* <button className={classNames(styles.btn, styles.show_on_web)}>
             <IonIcon
@@ -348,11 +328,7 @@ const Header = () => {
             type="button"
             onClick={() => handleMobileSearch(false)}
           >
-            <IonIcon
-              icon={arrowLeft}
-              slot="start"
-              className={classNames(styles.back_icon)}
-            />
+            <InlineIcon icon={arrowLeft} className={styles.back_icon} />
           </button>
           <input
             type="text"
@@ -362,11 +338,7 @@ const Header = () => {
             value={key}
           />
           <button className={styles.m_search_icon} type="submit">
-            <IonIcon
-              icon={searchOutline}
-              slot="start"
-              className={styles.m_submit_icon}
-            />
+            <InlineIcon icon={searchOutline} className={styles.m_submit_icon} />
           </button>
         </form>
         <div

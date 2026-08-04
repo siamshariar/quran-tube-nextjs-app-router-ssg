@@ -3,16 +3,6 @@ import { Store as PullStateStore } from "pullstate";
 import { lists, homeItems, notifications } from "../data";
 import { videos } from "../data/videos";
 
-const getStoredMiniNav = () => {
-  if (typeof window === "undefined") return false;
-
-  try {
-    return window.localStorage.getItem("isMiniNav") === "true";
-  } catch {
-    return false;
-  }
-};
-
 const Store = new PullStateStore({
   safeAreaTop: 0,
   safeAreaBottom: 0,
@@ -29,7 +19,7 @@ const Store = new PullStateStore({
 });
 
 export const UIStore = new PullStateStore({
-  isMiniNav: getStoredMiniNav(),
+  isMiniNav: false,
 });
 
 export const toggleMiniNav = (isActive) => {

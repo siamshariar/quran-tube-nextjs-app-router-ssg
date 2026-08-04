@@ -43,6 +43,7 @@ export default function PlayerModal({
   const [resumingTime, setResumingTime] = useState(null);
   const [isTimerSet, setIsTimerSet] = useState(false);
   const timerRef = useRef(null);
+  const retryTimeoutRef = useRef(null);
   const closeReportModal = () => setIsReportModalOpen(false);
   const handleClose = () => setAnchorEl(null);
 
@@ -113,7 +114,14 @@ export default function PlayerModal({
       }
     } catch (error) {
       if (attemptsLeft > 0) {
-        setTimeout(() => attemptPlayVideo(player, videoId, attemptsLeft - 1), 500); // Retry after 500ms
+        // Tracked in a ref so a pending retry can be cancelled if the
+        // modal closes (and the player/iframe gets torn down) before it
+        // fires -- otherwise it throws trying to call methods on a
+        // destroyed player.
+        retryTimeoutRef.current = setTimeout(() => {
+          retryTimeoutRef.current = null;
+          attemptPlayVideo(player, videoId, attemptsLeft - 1);
+        }, 500);
       } else {
         console.error("Failed to play video after multiple attempts:", error);
       }
@@ -125,6 +133,18 @@ export default function PlayerModal({
       attemptPlayVideo(player, videoId);
     }
   }, [videoId, currentVideoId, player]);
+
+  // Safety net: cancel any pending play retry if this component unmounts
+  // directly (bypassing handleModalClose), so it can never fire against a
+  // torn-down player.
+  useEffect(() => {
+    return () => {
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (videoId && videoId !== currentVideoId) {
@@ -154,6 +174,11 @@ export default function PlayerModal({
 
   // CSS for hiding and showing modal
   const handleModalClose = () => {
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = null;
+    }
+
     if (player) {
       const currentTime = player.getCurrentTime();
       const duration = player.getDuration();

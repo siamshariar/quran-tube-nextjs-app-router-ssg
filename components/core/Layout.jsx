@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { usePathname } from "next/navigation";
 import { IonPage } from "@ionic/react";
 import classNames from "classnames";
-import { UIStore, PopupStore } from "../../store";
+import { UIStore, PopupStore, toggleMiniNav } from "../../store";
 import Header from "./Header";
 import Nav from "./Nav";
 import MiniNav from "./MiniNav";
@@ -24,6 +24,16 @@ const Layout = ({ children }) => {
       container.current.scrollTop = 0; // Scroll the container to the top
     }
   }, [pathname]);
+
+  // Restore mini-nav preference after mount to avoid an SSR/CSR hydration mismatch
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem("isMiniNav") === "true";
+      if (stored) {
+        toggleMiniNav(true);
+      }
+    } catch {}
+  }, []);
 
   // mobile header scroll effect
   const [lastScrollTop, setLastScrollTop] = useState(0);

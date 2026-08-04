@@ -4,7 +4,7 @@ import styles from "./MiniNav.module.css";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { IonIcon, IonLabel, IonList } from "@ionic/react";
+import InlineIcon from "./InlineIcon";
 
 import {
   home,
@@ -67,23 +67,21 @@ const MiniNav = () => {
 
   return (
     <div className={styles.wrapper}>
-      <IonList className={styles.list}>
+      <div className={styles.list}>
         {pages.map((p, i) => (
           // <IonRouterLink //
           //   routerLink={p.url}
           //   key={i}
           // >
           <div className={styles.item} key={i} onClick={openModal}>
-            <IonIcon
-              icon={p.url === path ? p.icon : p.iconOutline}
-              slot="start"
-              className={styles.icon}
-            />
-            <IonLabel className={styles.label}>{p.title}</IonLabel>
+            <span className={styles.icon}>
+              <InlineIcon icon={p.url === path ? p.icon : p.iconOutline} />
+            </span>
+            <span className={styles.label}>{p.title}</span>
           </div>
           // </IonRouterLink>
         ))}
-      </IonList>
+      </div>
       <MenuClickModal open={modalOpen} closer={handleModalClose} />
     </div>
   );

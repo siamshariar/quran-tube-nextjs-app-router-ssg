@@ -255,6 +255,8 @@ const Recents = () => {
         videoType={modalData.videoType}
         attributes={modalData.attributes} // Pass the attributes to PlayerModal
         fullUrl={modalData.fullUrl}
+        metaTitle={metaData.title}
+        metaUrl={metaData.url}
         isIOS={isIOS}
       />
     </>

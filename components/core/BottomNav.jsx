@@ -4,7 +4,7 @@ import styles from "./BottomNav.module.css";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
-import { IonIcon, IonLabel, IonList } from "@ionic/react";
+import InlineIcon from "./InlineIcon";
 import classNames from "classnames";
 import {
   home,
@@ -73,7 +73,7 @@ const BottomNav = () => {
 
   return (
     <div className={styles.wrapper}>
-      <IonList className={styles.list}>
+      <div className={styles.list}>
         {pages.map((p, i) => (
           <div key={i}>
             {p.linkType == "inProgress" && (
@@ -85,12 +85,10 @@ const BottomNav = () => {
                 onClick={openModal}
               >
                 <div className={styles.inner}>
-                  <IonIcon
-                    icon={p.url === path ? p.icon : p.iconOutline}
-                    slot="start"
-                    className={styles.icon}
-                  />
-                  <IonLabel className={styles.label}>{p.title}</IonLabel>
+                  <span className={styles.icon}>
+                    <InlineIcon icon={p.url === path ? p.icon : p.iconOutline} />
+                  </span>
+                  <span className={styles.label}>{p.title}</span>
                 </div>
               </div>
             )}
@@ -110,18 +108,16 @@ const BottomNav = () => {
                                   : (p.url === path ? styles.active : "")
                       )}
                   >
-                    <IonIcon
-                        icon={p.url === path ? p.icon : p.iconOutline}
-                        slot="start"
-                        className={styles.icon}
-                    />
-                    <IonLabel className={styles.label}>{p.title}</IonLabel>
+                    <span className={styles.icon}>
+                      <InlineIcon icon={p.url === path ? p.icon : p.iconOutline} />
+                    </span>
+                    <span className={styles.label}>{p.title}</span>
                   </div>
                 </Link>
             )}
           </div>
         ))}
-      </IonList>
+      </div>
       <MenuClickModal open={modalOpen} closer={handleModalClose} />
     </div>
   );

@@ -30,6 +30,11 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
 
     const isMini = UIStore.useState((s) => s.isMiniNav);
     const [isLoadingMore, setIsloadingMore] = useState(true);
+    // A ref (checked synchronously) alongside the isLoadingMore state --
+    // Virtuoso's endReached can fire again before a state update flushes,
+    // and that race let loadMore() fire twice for the same page cursor,
+    // fetching and appending the same batch of videos twice.
+    const isLoadingMoreRef = useRef(true);
     const [playerModalData, setPlayerModalData] = useState({
         attributes: {},
         videoId: null,
@@ -68,6 +73,25 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
     const [toDateParam, setToDateParam] = useState(null);
     const [fromDateParam, setFromDateParam] = useState(null);
     const virtuosoRef = useRef(null);
+    const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 0);
+    // The app shell scrolls its own #main container (Layout.jsx), not the
+    // browser window (body has overflow:hidden) -- window.scrollY never
+    // moves. Virtuoso's `useWindowScroll` mode assumed otherwise, so its
+    // virtualized range math was computed against a scroll position that
+    // never changed, causing rows to render blank after certain
+    // interactions (e.g. opening/closing the player modal) desynced its
+    // cached range from the real, #main-driven scroll position.
+    const [scrollParent, setScrollParent] = useState(null);
+
+    useEffect(() => {
+        setScrollParent(document.getElementById("main"));
+    }, []);
+
+    useEffect(() => {
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     useEffect(() => {
         const handleOnline = () => setIsOnline(true);
@@ -120,6 +144,7 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
             }
 
             setActiveSubCat(initialActiveSubCat);
+            isLoadingMoreRef.current = true;
             setIsloadingMore(true);
 
             const fromDate = params.get("from");
@@ -134,22 +159,46 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
     }, [pathname]);
 
     const fetchData = async (url, isLoadMore) => {
+        const startedAt = Date.now();
         try {
             const res = await getVideosDataByUrl(url);
-            setData({
-                pagination: res.meta.pagination,
-                videos: isLoadMore? [...data.videos, ...res.data] : res.data,
+            setData((prev) => {
+                if (!isLoadMore) {
+                    return { pagination: res.meta.pagination, videos: res.data };
+                }
+                // De-dupe by id: appending against the latest state (not a
+                // stale closure) already prevents most duplication, but this
+                // is a safety net against the API itself overlapping pages.
+                const existingIds = new Set(prev.videos.map((v) => v.ytVideoId));
+                const newVideos = res.data.filter((v) => !existingIds.has(v.ytVideoId));
+                return {
+                    pagination: res.meta.pagination,
+                    videos: [...prev.videos, ...newVideos],
+                };
             });
         } catch (error) {
             // TODO: Display popup in case 429 Too Many Requests
             console.error(error);
         } finally {
-            setIsloadingMore(false);
+            // Keep the loading spinner visible for at least this long, so a
+            // fast response doesn't just flash it and disappear instantly.
+            const MIN_LOADING_DURATION = 500;
+            const remaining = MIN_LOADING_DURATION - (Date.now() - startedAt);
+            const stopLoading = () => {
+                isLoadingMoreRef.current = false;
+                setIsloadingMore(false);
+            };
+            if (remaining > 0) {
+                setTimeout(stopLoading, remaining);
+            } else {
+                stopLoading();
+            }
         }
     };
 
     const loadMore = () => {
-        if (!isLoadingMore && data.pagination.c !== null) {
+        if (!isLoadingMoreRef.current && data.pagination.c !== null) {
+            isLoadingMoreRef.current = true;
             setIsloadingMore(true);
             const url = getUrl(data.pagination, searchParam !== "" ? searchParam : activeSubCat, fromDateParam, toDateParam)
             fetchData(url, true);
@@ -248,12 +297,13 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
     };
 
     const getGroupSize = () => {
-      if (typeof window === "undefined") return 1
-
-      const width = window.innerWidth
-      if (width >= 1024) return 4
-      if (width >= 874) return 3
-      if (width >= 588) return 2
+      if (windowWidth >= 1024) return 4
+      if (windowWidth >= 874) return 3
+      // Shorts cards are narrow (50% width by default in CSS, even on the
+      // smallest screens), so they always fit 2 per row -- unlike regular
+      // video cards, which only go to 2 columns at the 588px breakpoint.
+      if (isShorts) return 2
+      if (windowWidth >= 588) return 2
       return 1
     }
 
@@ -269,7 +319,7 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
       return groups
     }
 
-    const groupedVideos = useMemo(() => getGroupedVideos(), [data.videos, isShorts])
+    const groupedVideos = useMemo(() => getGroupedVideos(), [data.videos, isShorts, windowWidth])
 
     const renderGroup = (index) => {
       const group = groupedVideos[index]
@@ -336,7 +386,7 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
                     <div className={styles.content} ref={containerRef}>
                           <Virtuoso
                             ref={virtuosoRef}
-                            useWindowScroll
+                            customScrollParent={scrollParent || undefined}
                             data={groupedVideos}
                             endReached={loadMore}
                             overscan={200}
@@ -344,7 +394,7 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
                             components={{
                               Footer,
                           }}
-                            style={{ width: "100%", height: "100vh" }}
+                            style={{ width: "100%" }}
                             totalCount={groupedVideos.length}
                                 />
                             </div>

@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 
-import { IonIcon, IonLabel } from "@ionic/react";
+import InlineIcon from "./InlineIcon";
 
 import {
   home,
@@ -241,12 +241,10 @@ const MenuList = ({ pages, openModal }) => {
               )}
               onClick={openModal}
             >
-              <IonIcon
-                icon={p.url === path ? p.icon : p.iconOutline}
-                slot="start"
-                className={styles.icon}
-              />
-              <IonLabel className={styles.label}>{p.title}</IonLabel>
+              <span className={styles.icon}>
+                <InlineIcon icon={p.url === path ? p.icon : p.iconOutline} />
+              </span>
+              <span className={styles.label}>{p.title}</span>
             </div>
           )}
           {p.linkType == "internal" && (
@@ -261,24 +259,20 @@ const MenuList = ({ pages, openModal }) => {
                           : (p.url === path ? styles.active : "")
                 )}
               >
-                <IonIcon
-                  icon={p.url === path ? p.icon : p.iconOutline}
-                  slot="start"
-                  className={styles.icon}
-                />
-                <IonLabel className={styles.label}>{p.title}</IonLabel>
+                <span className={styles.icon}>
+                  <InlineIcon icon={p.url === path ? p.icon : p.iconOutline} />
+                </span>
+                <span className={styles.label}>{p.title}</span>
               </div>
             </Link>
           )}
           {p.linkType == "external" && (
             <a href={p.url} target="_blank" rel="noreferrer">
               <div className={classNames(styles.item)}>
-                <IonIcon
-                  icon={p.iconOutline}
-                  slot="start"
-                  className={styles.icon}
-                />
-                <IonLabel className={styles.label}>{p.title}</IonLabel>
+                <span className={styles.icon}>
+                  <InlineIcon icon={p.iconOutline} />
+                </span>
+                <span className={styles.label}>{p.title}</span>
               </div>
             </a>
           )}

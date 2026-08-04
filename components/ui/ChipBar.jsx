@@ -2,12 +2,34 @@
 
 import styles from "./ChipBar.module.css";
 import classNames from "classnames";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useLayoutEffect, useRef, useState} from "react";
 import {useRouter} from "next/navigation";
 import {IonIcon} from "@ionic/react";
 import {next as nextIcon, previous as prevIcon} from "../../icons";
 import localizationData from '../../public/pagemenudata.json';
 import Link from "next/link";
+
+// Selecting a category navigates to a new dynamic route segment, which
+// remounts ChipBar -- persisting the scroll offset here (outside React
+// state) is what keeps the selected chip in view across that remount,
+// instead of the list snapping back to the start ("All").
+const SCROLL_STORAGE_KEY = "chipbar_scroll_left";
+
+const getStoredScrollLeft = () => {
+  if (typeof window === "undefined") return 0;
+  try {
+    return Number(window.sessionStorage.getItem(SCROLL_STORAGE_KEY)) || 0;
+  } catch {
+    return 0;
+  }
+};
+
+const storeScrollLeft = (value) => {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(SCROLL_STORAGE_KEY, String(value));
+  } catch {}
+};
 
 const ChipBar = ({ activeId, subCatClickHandler, pathname }) => {
   const locales = localizationData.data;
@@ -17,14 +39,35 @@ const ChipBar = ({ activeId, subCatClickHandler, pathname }) => {
 
   const [containerWidth, setContainerWidth] = useState(0);
   const [contentWidth, setContentWidth] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  // "All" sits at the very start of the list, so whenever it's the active
+  // selection the list should always open showing the beginning -- only
+  // restore the persisted offset when landing on a specific category.
+  const [scrollLeft, setScrollLeft] = useState(() => (activeId == null ? 0 : getStoredScrollLeft()));
+  // Only the arrow buttons should animate; restoring the persisted
+  // position after a remount must be instant (see CSS `.content`'s
+  // scroll-behavior: smooth, which would otherwise animate every restore).
+  const smoothScrollRef = useRef(false);
 
   const handleScroll = (dir) => {
+    smoothScrollRef.current = true;
     const maxScrollLeft = contentWidth - containerWidth;
     if (dir === "left") {
       setScrollLeft((prev) => Math.min(prev + 540, maxScrollLeft));
     } else if (dir === "right") {
       setScrollLeft((prev) => Math.max(prev - 540, 0));
+    }
+  };
+
+  const handleNativeScroll = (e) => {
+    storeScrollLeft(e.target.scrollLeft);
+  };
+
+  // Captures the scroll offset at the exact moment of click, before
+  // navigation/remount, so nothing (e.g. a browser focus-into-view nudge)
+  // can shift the persisted position in between.
+  const handleChipClick = () => {
+    if (containerRef.current) {
+      storeScrollLeft(containerRef.current.scrollLeft);
     }
   };
 
@@ -45,11 +88,21 @@ const ChipBar = ({ activeId, subCatClickHandler, pathname }) => {
     setWidth();
   }, [locales]);
 
-  useEffect(() => {
+  // useLayoutEffect (not useEffect) so the restored offset is applied
+  // before the browser paints -- otherwise the freshly-mounted container's
+  // native scrollLeft:0 flashes on screen for a frame first.
+  useLayoutEffect(() => {
     if (containerRef.current) {
+      containerRef.current.style.scrollBehavior = smoothScrollRef.current ? "smooth" : "auto";
       containerRef.current.scrollLeft = scrollLeft;
+      smoothScrollRef.current = false;
     }
-  }, [scrollLeft, containerWidth, contentWidth]);
+    // Don't let "All" forcing its own view to 0 clobber a specific
+    // category's saved offset -- only persist while a category is active.
+    if (activeId != null) {
+      storeScrollLeft(scrollLeft);
+    }
+  }, [scrollLeft, containerWidth, contentWidth, activeId]);
 
   const buildPath = (id, code) => {
     let firstPathSegment = pathname.split("/")[1] || "";
@@ -76,9 +129,9 @@ const ChipBar = ({ activeId, subCatClickHandler, pathname }) => {
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.content} ref={containerRef}>
+      <div className={styles.content} ref={containerRef} onScroll={handleNativeScroll}>
         <ul className={styles.list} ref={contentRef}>
-          <Link href={getPath(null, 'all')}>
+          <Link href={getPath(null, 'all')} onClick={handleChipClick}>
             <li
               className={classNames(styles.item, isAllActive ? styles.active : "")}
             >
@@ -86,7 +139,7 @@ const ChipBar = ({ activeId, subCatClickHandler, pathname }) => {
             </li>
           </Link>
           {locales.map((t, i) => (
-            <Link key={i} href={getPath(t.id, t.attributes.code)}>
+            <Link key={i} href={getPath(t.id, t.attributes.code)} onClick={handleChipClick}>
               <li
                 className={classNames(
                   styles.item,
