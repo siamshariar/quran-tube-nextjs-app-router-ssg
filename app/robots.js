@@ -1,12 +1,15 @@
 import { server } from "../lib/config";
+import { getSitemapIds } from "./sitemap";
 
-export default function robots() {
+export default async function robots() {
+  const ids = await getSitemapIds();
+
   return {
     rules: {
       userAgent: "*",
       allow: "/",
       disallow: ["/favorites", "/recents", "/search"],
     },
-    sitemap: `${server}/sitemap.xml`,
+    sitemap: ids.map((id) => `${server}/sitemap/${id}.xml`),
   };
 }

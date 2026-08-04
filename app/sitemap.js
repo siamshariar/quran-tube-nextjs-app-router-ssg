@@ -17,7 +17,17 @@ const staticRoutes = [
   "/privacy-policy",
 ];
 
-export default function sitemap() {
+// Google's sitemap protocol caps a single file at 50,000 URLs. Chunking
+// below that (instead of at it) leaves headroom for entries added within a
+// single build. generateSitemaps() below splits into /sitemap/<id>.xml
+// files once entries.length exceeds this, so growth to thousands of routes
+// (e.g. a future per-content page) doesn't require touching this file again.
+const MAX_URLS_PER_SITEMAP = 40000;
+
+// Centralizes every route source (static + locale-driven today) so new
+// sources can be appended here without changing the chunking/generateSitemaps
+// logic below.
+async function getAllEntries() {
   const now = new Date();
 
   const staticEntries = staticRoutes.map((route) => ({
@@ -38,4 +48,26 @@ export default function sitemap() {
   ]);
 
   return [...staticEntries, ...localeEntries];
+}
+
+// Shared with robots.js so it can list every generated /sitemap/<id>.xml
+// URL without duplicating the chunking math.
+export async function getSitemapIds() {
+  const entries = await getAllEntries();
+  const numberOfSitemaps = Math.max(
+    1,
+    Math.ceil(entries.length / MAX_URLS_PER_SITEMAP)
+  );
+  return Array.from({ length: numberOfSitemaps }, (_, id) => id);
+}
+
+export async function generateSitemaps() {
+  const ids = await getSitemapIds();
+  return ids.map((id) => ({ id }));
+}
+
+export default async function sitemap({ id }) {
+  const entries = await getAllEntries();
+  const start = id * MAX_URLS_PER_SITEMAP;
+  return entries.slice(start, start + MAX_URLS_PER_SITEMAP);
 }
