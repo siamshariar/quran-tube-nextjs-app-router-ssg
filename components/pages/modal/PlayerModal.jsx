@@ -53,6 +53,15 @@ const PlayerModal = forwardRef(function PlayerModal({
   // inside the real gesture, which is the one thing iOS actually honors.
   const [currentVideoId, setCurrentVideoId] = useState(isIOS ? DUMMY_VIDEO_ID : null);
   const [player, setPlayer] = useState(null);
+  // loadVideoById() starts an async load; an unMute() called immediately
+  // after (in the same synchronous tick, still inside the tap gesture)
+  // can land on the player before the new video has actually finished
+  // loading, and get reset back to muted once it does. This flag says
+  // "we just asked to unmute as part of a real gesture" so onStateChange
+  // can re-apply unMute() once the swapped-in video actually starts
+  // buffering/playing -- not a new gesture, just re-confirming one that's
+  // already in flight from the original tap.
+  const pendingUnmuteRef = useRef(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -134,6 +143,13 @@ const PlayerModal = forwardRef(function PlayerModal({
           player.loadVideoById(requestedVideoId);
           player.unMute();
           player.playVideo();
+          // loadVideoById() starts an async load -- the unMute() above can
+          // land before that finishes and get reset back to muted once it
+          // does. Mark that an unmute is in flight so onStateChange can
+          // re-apply it once the new video actually starts
+          // buffering/playing; this doesn't need a fresh gesture, it's
+          // just re-confirming the one already granted by this tap.
+          pendingUnmuteRef.current = true;
           return true;
         } catch (error) {
           console.error("playVideoRequest failed:", error);
@@ -182,6 +198,23 @@ const PlayerModal = forwardRef(function PlayerModal({
 
   const onError = (e) => {
     console.error("YouTube player error:", e.data);
+  };
+
+  const onStateChange = (e) => {
+    // YT.PlayerState: -1 unstarted, 0 ended, 1 playing, 2 paused,
+    // 3 buffering, 5 video cued. Once the swapped-in video actually
+    // starts loading, re-apply unMute() -- if the first call (right after
+    // loadVideoById()) landed before the new video finished loading, the
+    // player can silently reset back to muted once it does.
+    if (pendingUnmuteRef.current && (e.data === window.YT?.PlayerState?.PLAYING || e.data === 1 || e.data === 3 || e.data === 5)) {
+      pendingUnmuteRef.current = false;
+      try {
+        e.target.unMute();
+        e.target.playVideo();
+      } catch (error) {
+        console.error("re-confirm unMute failed:", error);
+      }
+    }
   };
 
   const onEnd = (e) => {
@@ -335,6 +368,7 @@ const PlayerModal = forwardRef(function PlayerModal({
                     onReady={onReady}
                     onEnd={onEnd}
                     onError={onError}
+                    onStateChange={onStateChange}
                 />
               )}
             </div>
