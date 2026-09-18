@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, forwardRef, useImperativeHandle } from "react";
 import Backdrop from "@mui/material/Backdrop";
 import Modal from "@mui/material/Modal";
 import Fade from "@mui/material/Fade";
@@ -18,7 +18,13 @@ import { addFavoriteVideo, removeFavoriteVideo, FavoriteVideosStore } from "../.
 import { updateVideoProgress } from "../../../store/RecentVideosStore";
 import TimerModal from "./TimerModal";
 
-export default function PlayerModal({
+// A short, embeddable public video used as the always-running muted
+// background player on iOS -- never actually watched, just kept "hot" so
+// that a card tap can swap it to the real video from directly inside that
+// tap's own synchronous click handler.
+const DUMMY_VIDEO_ID = "p3Mrisem6ek";
+
+const PlayerModal = forwardRef(function PlayerModal({
   open,
   closer,
   attributes = {},
@@ -28,13 +34,25 @@ export default function PlayerModal({
   metaTitle,
   metaUrl,
   isIOS,
-}) {
+}, ref) {
   // const playerRef = useRef(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const initVideoId = isIOS ? "p3Mrisem6ek" : videoId;
-  const [currentVideoId, setCurrentVideoId] = useState(initVideoId);
+
+  // --- iOS autoplay handling ---------------------------------------------
+  // iOS Safari only honors programmatic unMute() when it runs synchronously
+  // inside a direct user-gesture handler (e.g. a card's own onClick) --
+  // never from onReady, onStateChange, or any other async player-API
+  // callback, no matter how quickly that fires after the tap.
+  //
+  // So the muted dummy player is mounted unconditionally on iOS the moment
+  // this component mounts (not gated on `open`), and kept running in the
+  // background even while the modal is closed. When a video card is
+  // tapped, ContentPage calls playVideoRequest() (exposed via this
+  // component's ref) *directly inside that tap's click handler* --
+  // loadVideoById()/unMute()/playVideo() all run there, synchronously,
+  // inside the real gesture, which is the one thing iOS actually honors.
+  const [currentVideoId, setCurrentVideoId] = useState(isIOS ? DUMMY_VIDEO_ID : null);
   const [player, setPlayer] = useState(null);
-  const [isInitialVideo, setIsInitialVideo] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -43,7 +61,6 @@ export default function PlayerModal({
   const [resumingTime, setResumingTime] = useState(null);
   const [isTimerSet, setIsTimerSet] = useState(false);
   const timerRef = useRef(null);
-  const retryTimeoutRef = useRef(null);
   const closeReportModal = () => setIsReportModalOpen(false);
   const handleClose = () => setAnchorEl(null);
 
@@ -103,67 +120,68 @@ export default function PlayerModal({
     window.dispatchEvent(new CustomEvent('favoritesUpdated', { detail: { videoId: videoId || attributes.ytVideoId } }));
   };
 
-  const attemptPlayVideo = (player, videoId, attemptsLeft = 3) => {
-    try {
-      if (player && videoId && currentVideoId) {
-        if (currentVideoId !== videoId && !isIOS) {
-          player.loadVideoById(videoId); // Load the video
+  // Exposed to ContentPage so it can call this *directly inside* a video
+  // card's own onClick handler -- that's the one place a call to
+  // loadVideoById()/unMute()/playVideo() runs synchronously inside a real
+  // user gesture, which is what iOS actually requires. Returns true if it
+  // handled the swap itself (so the caller doesn't also need to); false
+  // means the dummy player isn't ready yet and the normal
+  // open+videoId-driven effect below should just load the video normally.
+  useImperativeHandle(ref, () => ({
+    playVideoRequest: (requestedVideoId) => {
+      if (isIOS && player && currentVideoId !== requestedVideoId) {
+        try {
+          player.loadVideoById(requestedVideoId);
+          player.unMute();
+          player.playVideo();
+          return true;
+        } catch (error) {
+          console.error("playVideoRequest failed:", error);
+          return false;
         }
-        player.playVideo(); // Play the video
-        player.unMute(); // Unmute the video
       }
-    } catch (error) {
-      if (attemptsLeft > 0) {
-        // Tracked in a ref so a pending retry can be cancelled if the
-        // modal closes (and the player/iframe gets torn down) before it
-        // fires -- otherwise it throws trying to call methods on a
-        // destroyed player.
-        retryTimeoutRef.current = setTimeout(() => {
-          retryTimeoutRef.current = null;
-          attemptPlayVideo(player, videoId, attemptsLeft - 1);
-        }, 500);
-      } else {
-        console.error("Failed to play video after multiple attempts:", error);
+      return false;
+    },
+  }), [isIOS, player, currentVideoId]);
+
+  // Keeps currentVideoId in sync with what's actually loaded. On iOS the
+  // dummy player is already running in the background (mounted at initial
+  // state above) and playVideoRequest() above does the real swap+unmute
+  // synchronously inside the card's click handler -- this effect only
+  // needs to record that swap in state, or handle the (non-iOS, or iOS
+  // fallback) case where nothing swapped it yet.
+  useEffect(() => {
+    if (!open || !videoId) return;
+
+    if (currentVideoId === videoId) return;
+
+    if (!isIOS) {
+      setCurrentVideoId(videoId);
+      return;
+    }
+
+    // iOS: playVideoRequest() should have already swapped the dummy player
+    // over during the click handler. If for some reason it hasn't (e.g.
+    // the dummy player wasn't ready yet), fall back to loading it here --
+    // this path won't reliably unmute, since it's no longer inside the
+    // original click's synchronous gesture, but it keeps the correct
+    // video showing instead of nothing.
+    if (player) {
+      try {
+        player.loadVideoById(videoId);
+      } catch (error) {
+        console.error("loadVideoById fallback failed:", error);
       }
     }
-  };
-
-  useEffect(() => {
-    if (player && videoId) {
-      attemptPlayVideo(player, videoId);
-    }
-  }, [videoId, currentVideoId, player]);
-
-  // Safety net: cancel any pending play retry if this component unmounts
-  // directly (bypassing handleModalClose), so it can never fire against a
-  // torn-down player.
-  useEffect(() => {
-    return () => {
-      if (retryTimeoutRef.current) {
-        clearTimeout(retryTimeoutRef.current);
-        retryTimeoutRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (videoId && videoId !== currentVideoId) {
-      const newVideoId = isIOS ? "p3Mrisem6ek" : videoId;
-      setCurrentVideoId(newVideoId);
-      setIsInitialVideo(true);
-    }
-  }, [videoId, isIOS, currentVideoId]);
-
-  // const ShareIcon = () => (
-  //   <IonIcon icon={shareOutline} slot="start" className={styles.icon} />
-  // );
+    setCurrentVideoId(videoId);
+  }, [open, videoId, isIOS, currentVideoId, player]);
 
   const onReady = (e) => {
-    let playerObj = e.target;
-    setPlayer(playerObj);
-    if (isInitialVideo) {
-      setIsInitialVideo(false);
-    }
+    setPlayer(e.target);
+  };
+
+  const onError = (e) => {
+    console.error("YouTube player error:", e.data);
   };
 
   const onEnd = (e) => {
@@ -174,23 +192,34 @@ export default function PlayerModal({
 
   // CSS for hiding and showing modal
   const handleModalClose = () => {
-    if (retryTimeoutRef.current) {
-      clearTimeout(retryTimeoutRef.current);
-      retryTimeoutRef.current = null;
-    }
-
     if (player) {
       const currentTime = player.getCurrentTime();
       const duration = player.getDuration();
       updateVideoProgress(videoId, currentTime, duration);
-      player.stopVideo(); 
+
+      // On iOS, swap back to the muted dummy and keep it playing in the
+      // background (instead of tearing the player down) so the next card
+      // tap has an already-running, already-unlocked player to swap again
+      // -- tearing it down here would mean starting cold (and muted-only)
+      // next time. Non-iOS just stops, no background player to maintain.
+      if (isIOS) {
+        try {
+          player.loadVideoById(DUMMY_VIDEO_ID);
+          player.mute();
+          player.playVideo();
+        } catch (error) {
+          console.error("reset-to-dummy failed:", error);
+        }
+        setCurrentVideoId(DUMMY_VIDEO_ID);
+      } else {
+        player.stopVideo();
+        setCurrentVideoId(null);
+        setPlayer(null);
+      }
     }
 
     setTimerDuration(null);
     setResumingTime(null);
-    setCurrentVideoId(null);
-    setPlayer(null);
-    setIsInitialVideo(true);
     handleClose();
     closer();
     setIsTimerModalOpen(false);
@@ -266,7 +295,10 @@ export default function PlayerModal({
             >
               {currentVideoId && (
                 <YouTube
-                    key={currentVideoId}
+                    // Keep the same player instance across the dummy -> real
+                    // swap on iOS (remounting would create a fresh iframe,
+                    // even less likely to carry over any autoplay state).
+                    key={isIOS ? "ios-player" : currentVideoId}
                     videoId={currentVideoId}
                     opts={{
                       playerVars: {
@@ -276,7 +308,11 @@ export default function PlayerModal({
                         loop: 1,
                         modestbranding: 1,
                         showinfo: 0,
-                        mute: isIOS && isInitialVideo ? 1 : 0, // TODO: Add isIOS cond
+                        // Only matters at initial mount, when currentVideoId
+                        // is seeded to the dummy id on iOS -- runtime
+                        // mute/unmute afterwards goes through player.mute()/
+                        // unMute() calls instead.
+                        mute: isIOS ? 1 : 0,
                         playlist: currentVideoId,
                         rel: 0,
                         iv_load_policy: 3,
@@ -285,6 +321,7 @@ export default function PlayerModal({
                     }}
                     onReady={onReady}
                     onEnd={onEnd}
+                    onError={onError}
                 />
               )}
             </div>
@@ -421,4 +458,6 @@ export default function PlayerModal({
       </Modal>
     </>
   );
-}
+});
+
+export default PlayerModal;

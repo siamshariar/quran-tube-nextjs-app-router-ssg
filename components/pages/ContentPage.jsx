@@ -73,6 +73,7 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
     const [toDateParam, setToDateParam] = useState(null);
     const [fromDateParam, setFromDateParam] = useState(null);
     const virtuosoRef = useRef(null);
+    const playerModalRef = useRef(null);
     const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 0);
     // The app shell scrolls its own #main container (Layout.jsx), not the
     // browser window (body has overflow:hidden) -- window.scrollY never
@@ -257,6 +258,15 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
             return;
         }
 
+        // Must run synchronously, right here inside this click handler --
+        // this is the one place a call to the YouTube player's
+        // unMute()/playVideo() runs inside a real, direct user gesture,
+        // which is the only thing iOS Safari actually honors for turning
+        // sound on. Anything routed through state/effects afterwards is
+        // asynchronous relative to this tap and iOS will ignore the
+        // unmute. See PlayerModal's playVideoRequest for the swap itself.
+        playerModalRef.current?.playVideoRequest(ytVideoId);
+
         const urlParams = new URLSearchParams(window.location.search);
         let videoUrl= `${pathname}?${urlParams.toString()}`;
 
@@ -358,6 +368,7 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
         <>
             <Meta title={metaTitle} description={metaDescription} url={metaUrl} image={metaImage} statusBarColor={metaStatusBarColor} type="website" />
             <PlayerModal
+                ref={playerModalRef}
                 open={modalOpen}
                 closer={handleModalClose}
                 videoId={playerModalData.videoId}
