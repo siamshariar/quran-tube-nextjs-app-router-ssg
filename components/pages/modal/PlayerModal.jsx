@@ -185,7 +185,20 @@ const PlayerModal = forwardRef(function PlayerModal({
   };
 
   const onEnd = (e) => {
-    if (player && open) {
+    if (!player) return;
+
+    // Defensive: the background dummy player (running while the modal is
+    // closed, or right after resetting back to it) should never end up
+    // audibly playing. loop:1 + playlist normally keeps it looping without
+    // ever firing onEnd, but if it ever does, re-mute before replaying so
+    // it can't slip into an unmuted state on its own.
+    if (isIOS && currentVideoId === DUMMY_VIDEO_ID) {
+      player.mute();
+      player.playVideo();
+      return;
+    }
+
+    if (open) {
       player.playVideo();
     }
   };
