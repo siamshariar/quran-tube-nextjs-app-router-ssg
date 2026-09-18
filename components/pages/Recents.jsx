@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import RecentCard from "../cards/RecentCard";
 import PlayerModal from "./modal/PlayerModal";
 import Meta from "../core/Meta";
@@ -27,6 +27,7 @@ const Recents = () => {
   });
   const [isVideosLoaded, setIsVideosLoaded] = useState(false);
   const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const playerModalRef = useRef(null);
 
   useEffect(() => {
     const loadVideos = async () => {
@@ -61,13 +62,20 @@ const Recents = () => {
   const openModal = (ytVideoId, title, videoType, slug, pathname, attributes, fullUrl) => {
     const recent = recentVideos.find(video => video.ytVideoId === ytVideoId);
     const finalFullUrl = fullUrl || (recent ? recent.fullUrl : `${server}/recents?v=${slug || ytVideoId}`);
-  
+
     // Check if this is a new tab scenario
     if (window.opener) {
       window.location.href = finalFullUrl;
       return;
     }
-  
+
+    // Must run synchronously, inside this call -- when triggered from a
+    // card's own onClick, this is the one place a call to the YouTube
+    // player's unMute()/playVideo() runs inside a real, direct user
+    // gesture, which is what iOS Safari actually honors for turning sound
+    // on. See PlayerModal's playVideoRequest for the swap itself.
+    playerModalRef.current?.playVideoRequest(ytVideoId);
+
     setModalData({
       open: true,
       videoId: ytVideoId,
@@ -248,6 +256,7 @@ const Recents = () => {
 </div>
       </div>
       <PlayerModal
+        ref={playerModalRef}
         open={modalData.open}
         closer={handleModalClose}
         videoId={modalData.videoId}
