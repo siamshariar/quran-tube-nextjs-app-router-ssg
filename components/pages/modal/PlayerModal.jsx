@@ -66,6 +66,14 @@ const PlayerModal = forwardRef(function PlayerModal({
   // if the modal closes (tearing the player down) before it fires --
   // otherwise it would throw trying to call methods on a destroyed player.
   const retryTimeoutRef = useRef(null);
+  // If a card is tapped before the background dummy player has fired
+  // onReady yet (e.g. a page like Recents/Favorites was just mounted and
+  // the click lands within the first moment), playVideoRequest() has no
+  // player to call yet. Without this, that tap is silently dropped and
+  // the dummy video is left playing instead of the requested one. This
+  // records the request so the onReady handler below can apply it as soon
+  // as the player becomes available.
+  const pendingVideoIdRef = useRef(null);
   const [isFavorited, setIsFavorited] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -151,6 +159,14 @@ const PlayerModal = forwardRef(function PlayerModal({
   const attemptSwap = (playerObj, targetVideoId, attemptsLeft = 4) => {
     try {
       playerObj.loadVideoById(targetVideoId);
+      // Resume a previously-watched video's saved progress. This used to
+      // be the opts.playerVars.start prop instead, but that has to stay
+      // pinned at 0 on iOS now (see the opts comment below) so it can't be
+      // used for this -- seekTo() after loadVideoById() achieves the same
+      // resume behavior without touching that pinned prop.
+      if (targetVideoId !== DUMMY_VIDEO_ID && attributes.currentTime) {
+        playerObj.seekTo(Math.floor(attributes.currentTime), true);
+      }
       playerObj.unMute();
       playerObj.playVideo();
       // loadVideoById() starts an async load -- the unMute() above can
@@ -183,8 +199,17 @@ const PlayerModal = forwardRef(function PlayerModal({
 
   useImperativeHandle(ref, () => ({
     playVideoRequest: (requestedVideoId) => {
-      if (isIOS && player && currentVideoId !== requestedVideoId) {
+      if (!isIOS) return false;
+      if (player && currentVideoId !== requestedVideoId) {
         attemptSwap(player, requestedVideoId);
+        return true;
+      }
+      // Player not ready yet (e.g. tapped a card right after this page
+      // mounted, before the dummy player's onReady fired) -- stash the
+      // request so onReady can apply it the moment the player exists,
+      // instead of silently dropping it and leaving the dummy playing.
+      if (!player) {
+        pendingVideoIdRef.current = requestedVideoId;
         return true;
       }
       return false;
@@ -200,6 +225,7 @@ const PlayerModal = forwardRef(function PlayerModal({
         clearTimeout(retryTimeoutRef.current);
         retryTimeoutRef.current = null;
       }
+      pendingVideoIdRef.current = null;
     };
   }, []);
 
@@ -235,6 +261,12 @@ const PlayerModal = forwardRef(function PlayerModal({
 
   const onReady = (e) => {
     setPlayer(e.target);
+
+    if (pendingVideoIdRef.current) {
+      const requestedVideoId = pendingVideoIdRef.current;
+      pendingVideoIdRef.current = null;
+      attemptSwap(e.target, requestedVideoId);
+    }
   };
 
   const onError = (e) => {
@@ -411,17 +443,41 @@ const PlayerModal = forwardRef(function PlayerModal({
                         autoplay: 1,
                         playsinline: 1, // forbid fullscreen on ios
                         fs: 0,
-                        loop: 1,
+                        // loop:1 + playlist would keep this player looping
+                        // back to the dummy video forever -- fine while
+                        // it's just the background dummy, but on iOS this
+                        // videoId prop never changes (see the comment
+                        // below), so that config would stay in effect even
+                        // after playVideoRequest() swaps in a real video
+                        // via the player API, and YouTube can silently
+                        // re-sync back to its own playlist (the dummy)
+                        // while the swapped-in video is still buffering.
+                        // The dummy's own looping is instead handled
+                        // manually in onEnd below, so this isn't needed on
+                        // iOS at all; non-iOS has no swap-in-place setup so
+                        // looping back to the same single video is fine.
+                        ...(isIOS ? {} : { loop: 1, playlist: currentVideoId }),
                         modestbranding: 1,
                         showinfo: 0,
                         // Only matters at initial mount -- runtime mute/
                         // unmute afterwards goes through player.mute()/
                         // unMute() calls instead.
                         mute: isIOS ? 1 : 0,
-                        playlist: isIOS ? DUMMY_VIDEO_ID : currentVideoId,
                         rel: 0,
                         iv_load_policy: 3,
-                        start: Math.floor(attributes.currentTime || 0),
+                        // On iOS this must stay pinned at 0, like videoId
+                        // above -- react-youtube's own componentDidUpdate
+                        // (shouldUpdateVideo) compares opts.playerVars.start
+                        // across renders and, if it differs (e.g. a
+                        // previously-watched recent video's saved
+                        // currentTime vs. 0 for the dummy), fires its own
+                        // loadVideoById() using the videoId *prop*, which is
+                        // permanently DUMMY_VIDEO_ID on iOS -- silently
+                        // reloading the dummy right after our manual swap in
+                        // attemptSwap(). Resuming a real video's saved
+                        // progress on iOS is instead done with player
+                        // .seekTo() inside attemptSwap.
+                        start: isIOS ? 0 : Math.floor(attributes.currentTime || 0),
                       },
                     }}
                     onReady={onReady}

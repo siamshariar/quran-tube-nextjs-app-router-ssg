@@ -15,6 +15,8 @@ const Favorites = () => {
   const favoriteVideos = useStoreState(FavoriteVideosStore, s => s.favoriteVideos);
   const [searchTerm, setSearchTerm] = useState("");
   const ref = useRef();
+  const playerModalRef = useRef(null);
+  const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const [isLoadingMore, setIsloadingMore] = useState(true);
   const [filteredFavorites, setFilteredFavorites] = useState([]);
   const [modalData, setModalData] = useState({
@@ -74,7 +76,11 @@ const Favorites = () => {
   const openModal = (ytVideoId, title, videoType, slug) => {
     const favorite = favoriteVideos.find(video => video.ytVideoId === ytVideoId);
     const fullUrl = favorite ? favorite.fullUrl : `${server}/favorites?v=${slug || ytVideoId}`;
-    
+
+    // Must run synchronously, inside this call -- see Recents/ContentPage
+    // openModal for why (iOS unMute() only honors a direct user gesture).
+    playerModalRef.current?.playVideoRequest(ytVideoId);
+
     setModalData({
       open: true,
       videoId: ytVideoId,
@@ -168,6 +174,7 @@ const Favorites = () => {
       </div>
 
         <PlayerModal
+          ref={playerModalRef}
           open={modalData.open}
           closer={handleModalClose}
           videoId={modalData.videoId}
@@ -178,6 +185,7 @@ const Favorites = () => {
           metaUrl={metaData.url}
           onFavoriteChange={handleFavoriteChange}
           fullUrl={modalData.fullUrl}
+          isIOS={isIOS}
         />
     </>
   );
