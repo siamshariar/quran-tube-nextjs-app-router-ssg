@@ -62,6 +62,10 @@ const PlayerModal = forwardRef(function PlayerModal({
   // buffering/playing -- not a new gesture, just re-confirming one that's
   // already in flight from the original tap.
   const pendingUnmuteRef = useRef(false);
+  // Tracks a pending retry of the swap call below, so it can be cancelled
+  // if the modal closes (tearing the player down) before it fires --
+  // otherwise it would throw trying to call methods on a destroyed player.
+  const retryTimeoutRef = useRef(null);
   const [isFavorited, setIsFavorited] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -136,29 +140,68 @@ const PlayerModal = forwardRef(function PlayerModal({
   // handled the swap itself (so the caller doesn't also need to); false
   // means the dummy player isn't ready yet and the normal
   // open+videoId-driven effect below should just load the video normally.
+  // Attempts the actual swap; retried briefly on failure since the YouTube
+  // widget API can throw "Cannot read properties of null" when called
+  // while the player is still mid-flight from a very recent previous
+  // loadVideoById() (e.g. switching to a second video shortly after the
+  // first started) -- its internal iframe reference is momentarily
+  // unavailable, not permanently broken. The first attempt still runs
+  // synchronously inside the tap that triggered it; only failed retries
+  // are delayed.
+  const attemptSwap = (playerObj, targetVideoId, attemptsLeft = 4) => {
+    try {
+      playerObj.loadVideoById(targetVideoId);
+      playerObj.unMute();
+      playerObj.playVideo();
+      // loadVideoById() starts an async load -- the unMute() above can
+      // land before that finishes and get reset back to muted once it
+      // does. Mark that an unmute is in flight so onStateChange can
+      // re-apply it once the new video actually starts
+      // buffering/playing; this doesn't need a fresh gesture, it's
+      // just re-confirming the one already granted by this tap.
+      pendingUnmuteRef.current = true;
+      // Record the swap in state so the videoId-sync effect below sees
+      // currentVideoId === videoId and skips its own fallback
+      // loadVideoById() call -- without this, that effect keeps re-firing
+      // this same swap on every render (its currentVideoId check never
+      // matched because nothing ever updated currentVideoId), calling
+      // loadVideoById() a second time back-to-back with this one and
+      // racing it, which is what caused the intermittent
+      // "Cannot read properties of null" failures on a second video tap.
+      setCurrentVideoId(targetVideoId);
+    } catch (error) {
+      if (attemptsLeft > 0) {
+        retryTimeoutRef.current = setTimeout(() => {
+          retryTimeoutRef.current = null;
+          attemptSwap(playerObj, targetVideoId, attemptsLeft - 1);
+        }, 150);
+      } else {
+        console.error("attemptSwap failed after retries:", error);
+      }
+    }
+  };
+
   useImperativeHandle(ref, () => ({
     playVideoRequest: (requestedVideoId) => {
       if (isIOS && player && currentVideoId !== requestedVideoId) {
-        try {
-          player.loadVideoById(requestedVideoId);
-          player.unMute();
-          player.playVideo();
-          // loadVideoById() starts an async load -- the unMute() above can
-          // land before that finishes and get reset back to muted once it
-          // does. Mark that an unmute is in flight so onStateChange can
-          // re-apply it once the new video actually starts
-          // buffering/playing; this doesn't need a fresh gesture, it's
-          // just re-confirming the one already granted by this tap.
-          pendingUnmuteRef.current = true;
-          return true;
-        } catch (error) {
-          console.error("playVideoRequest failed:", error);
-          return false;
-        }
+        attemptSwap(player, requestedVideoId);
+        return true;
       }
       return false;
     },
   }), [isIOS, player, currentVideoId]);
+
+  // Safety net: cancel any pending swap retry if this component unmounts
+  // directly (bypassing handleModalClose), so it can never fire against a
+  // torn-down player.
+  useEffect(() => {
+    return () => {
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   // Keeps currentVideoId in sync with what's actually loaded. On iOS the
   // dummy player is already running in the background (mounted at initial
@@ -177,19 +220,17 @@ const PlayerModal = forwardRef(function PlayerModal({
     }
 
     // iOS: playVideoRequest() should have already swapped the dummy player
-    // over during the click handler. If for some reason it hasn't (e.g.
-    // the dummy player wasn't ready yet), fall back to loading it here --
-    // this path won't reliably unmute, since it's no longer inside the
-    // original click's synchronous gesture, but it keeps the correct
-    // video showing instead of nothing.
+    // over during the click handler (and already called setCurrentVideoId
+    // itself, so this effect wouldn't even get this far for that swap).
+    // This only runs as a fallback for the rare case where that didn't
+    // happen (e.g. the dummy player wasn't ready yet on the very first
+    // open) -- reuses the same retrying swap so it doesn't race a second,
+    // competing loadVideoById() call against one already in flight. Won't
+    // reliably unmute, since it's no longer inside the original click's
+    // synchronous gesture, but keeps the correct video showing.
     if (player) {
-      try {
-        player.loadVideoById(videoId);
-      } catch (error) {
-        console.error("loadVideoById fallback failed:", error);
-      }
+      attemptSwap(player, videoId);
     }
-    setCurrentVideoId(videoId);
   }, [open, videoId, isIOS, currentVideoId, player]);
 
   const onReady = (e) => {
@@ -238,6 +279,11 @@ const PlayerModal = forwardRef(function PlayerModal({
 
   // CSS for hiding and showing modal
   const handleModalClose = () => {
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = null;
+    }
+
     if (player) {
       const currentTime = player.getCurrentTime();
       const duration = player.getDuration();
@@ -341,11 +387,25 @@ const PlayerModal = forwardRef(function PlayerModal({
             >
               {currentVideoId && (
                 <YouTube
-                    // Keep the same player instance across the dummy -> real
-                    // swap on iOS (remounting would create a fresh iframe,
-                    // even less likely to carry over any autoplay state).
+                    // Keep the same player instance across every video swap
+                    // on iOS (remounting would create a fresh iframe, even
+                    // less likely to carry over any autoplay state).
                     key={isIOS ? "ios-player" : currentVideoId}
-                    videoId={currentVideoId}
+                    // On iOS, this must NEVER change after mount: react-youtube
+                    // watches its own `videoId` prop and calls its own
+                    // internal loadVideoById() whenever it changes (see
+                    // react-youtube's updateVideo()/componentDidUpdate) --
+                    // racing against our manual loadVideoById()/unMute()/
+                    // playVideo() in playVideoRequest() and silently
+                    // breaking the swap (confirmed via a
+                    // "Cannot read properties of null" error from
+                    // youtube's widget API when both calls landed close
+                    // together). So on iOS the prop stays pinned to the
+                    // dummy id forever; playVideoRequest()'s manual player
+                    // API calls are the *only* thing that ever changes what
+                    // video is actually loaded. Non-iOS has no such
+                    // conflict and keeps following currentVideoId normally.
+                    videoId={isIOS ? DUMMY_VIDEO_ID : currentVideoId}
                     opts={{
                       playerVars: {
                         autoplay: 1,
@@ -354,12 +414,11 @@ const PlayerModal = forwardRef(function PlayerModal({
                         loop: 1,
                         modestbranding: 1,
                         showinfo: 0,
-                        // Only matters at initial mount, when currentVideoId
-                        // is seeded to the dummy id on iOS -- runtime
-                        // mute/unmute afterwards goes through player.mute()/
+                        // Only matters at initial mount -- runtime mute/
+                        // unmute afterwards goes through player.mute()/
                         // unMute() calls instead.
                         mute: isIOS ? 1 : 0,
-                        playlist: currentVideoId,
+                        playlist: isIOS ? DUMMY_VIDEO_ID : currentVideoId,
                         rel: 0,
                         iv_load_policy: 3,
                         start: Math.floor(attributes.currentTime || 0),
