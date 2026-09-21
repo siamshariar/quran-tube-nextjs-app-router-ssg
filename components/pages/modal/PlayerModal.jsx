@@ -69,6 +69,14 @@ const PlayerModal = forwardRef(function PlayerModal({
   // Holds the target second to seek to once onStateChange sees the video
   // actually reach a loaded state; cleared once applied.
   const pendingSeekSecondsRef = useRef(null);
+  // Backs up the onStateChange re-confirm above: real iOS devices (not
+  // reproduced on desktop WebKit) have been seen re-entering
+  // BUFFERING/UNSTARTED a second time even after PLAYING already fired
+  // once, silently dropping a seek that briefly looked like it had landed.
+  // This polls getCurrentTime() for a few seconds after a swap and
+  // re-applies the pending seek if playback drifted back near 0, so the
+  // resume doesn't depend on catching the "right" PLAYING event.
+  const seekWatchdogRef = useRef(null);
   // Tracks a pending retry of the swap call below, so it can be cancelled
   // if the modal closes (tearing the player down) before it fires --
   // otherwise it would throw trying to call methods on a destroyed player.
@@ -188,6 +196,34 @@ const PlayerModal = forwardRef(function PlayerModal({
       playerObj.loadVideoById({ videoId: targetVideoId, startSeconds });
       if (startSeconds) {
         pendingSeekSecondsRef.current = startSeconds;
+        if (seekWatchdogRef.current) {
+          clearInterval(seekWatchdogRef.current);
+        }
+        let checksLeft = 20; // ~10s at 500ms, generous for a slow real-device load
+        seekWatchdogRef.current = setInterval(() => {
+          checksLeft -= 1;
+          if (pendingSeekSecondsRef.current === null || checksLeft <= 0) {
+            clearInterval(seekWatchdogRef.current);
+            seekWatchdogRef.current = null;
+            return;
+          }
+          try {
+            const current = playerObj.getCurrentTime ? playerObj.getCurrentTime() : 0;
+            if (current >= pendingSeekSecondsRef.current - 1) {
+              pendingSeekSecondsRef.current = null;
+              clearInterval(seekWatchdogRef.current);
+              seekWatchdogRef.current = null;
+            } else if (playerObj.getPlayerState && playerObj.getPlayerState() === 1) {
+              // Only re-seek while actually playing -- same reasoning as
+              // the onStateChange re-confirm: seeking during
+              // buffering/unstarted gets silently dropped.
+              playerObj.seekTo(pendingSeekSecondsRef.current, true);
+            }
+          } catch (error) {
+            clearInterval(seekWatchdogRef.current);
+            seekWatchdogRef.current = null;
+          }
+        }, 500);
       }
       playerObj.unMute();
       playerObj.playVideo();
@@ -255,6 +291,10 @@ const PlayerModal = forwardRef(function PlayerModal({
       pendingVideoIdRef.current = null;
       pendingVideoResumeSecondsRef.current = undefined;
       pendingSeekSecondsRef.current = null;
+      if (seekWatchdogRef.current) {
+        clearInterval(seekWatchdogRef.current);
+        seekWatchdogRef.current = null;
+      }
     };
   }, []);
 
@@ -326,12 +366,22 @@ const PlayerModal = forwardRef(function PlayerModal({
     // a seekTo() fired as soon as BUFFERING (3) is reached still isn't
     // reliable -- the media pipeline hasn't caught up yet at that point, so
     // the position visibly lands for an instant and then snaps back to 0 as
-    // buffering continues. Only PLAYING (1) is actually safe to seek on.
+    // buffering continues. Only PLAYING (1) is actually safe to seek on --
+    // but on some real devices (seen only on real iOS, not desktop-WebKit
+    // emulation) the player can cycle BUFFERING/UNSTARTED a second time
+    // after that first PLAYING, dropping the seek again. So this doesn't
+    // consume the pending seek on first use -- it keeps re-applying it on
+    // every PLAYING until getCurrentTime() actually confirms we're at (or
+    // past) the target, then stops.
     if (pendingSeekSecondsRef.current !== null && (e.data === window.YT?.PlayerState?.PLAYING || e.data === 1)) {
       const seconds = pendingSeekSecondsRef.current;
-      pendingSeekSecondsRef.current = null;
       try {
-        e.target.seekTo(seconds, true);
+        const current = e.target.getCurrentTime ? e.target.getCurrentTime() : 0;
+        if (current >= seconds - 1) {
+          pendingSeekSecondsRef.current = null;
+        } else {
+          e.target.seekTo(seconds, true);
+        }
       } catch (error) {
         console.error("re-confirm seekTo failed:", error);
       }
@@ -363,6 +413,11 @@ const PlayerModal = forwardRef(function PlayerModal({
       clearTimeout(retryTimeoutRef.current);
       retryTimeoutRef.current = null;
     }
+    if (seekWatchdogRef.current) {
+      clearInterval(seekWatchdogRef.current);
+      seekWatchdogRef.current = null;
+    }
+    pendingSeekSecondsRef.current = null;
 
     if (player) {
       const currentTime = player.getCurrentTime();
