@@ -62,6 +62,13 @@ const PlayerModal = forwardRef(function PlayerModal({
   // buffering/playing -- not a new gesture, just re-confirming one that's
   // already in flight from the original tap.
   const pendingUnmuteRef = useRef(false);
+  // Same idea as pendingUnmuteRef, but for resuming a previously-watched
+  // video's saved position: loadVideoById({ startSeconds }) can silently
+  // ignore that startSeconds while the video is still in its initial
+  // unstarted/cueing state (right when attemptSwap runs, inside the tap).
+  // Holds the target second to seek to once onStateChange sees the video
+  // actually reach a loaded state; cleared once applied.
+  const pendingSeekSecondsRef = useRef(null);
   // Tracks a pending retry of the swap call below, so it can be cancelled
   // if the modal closes (tearing the player down) before it fires --
   // otherwise it would throw trying to call methods on a destroyed player.
@@ -74,6 +81,9 @@ const PlayerModal = forwardRef(function PlayerModal({
   // records the request so the onReady handler below can apply it as soon
   // as the player becomes available.
   const pendingVideoIdRef = useRef(null);
+  // Paired with pendingVideoIdRef -- the resumeSeconds passed alongside it
+  // to playVideoRequest(), replayed together once the player is ready.
+  const pendingVideoResumeSecondsRef = useRef(undefined);
   const [isFavorited, setIsFavorited] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -156,16 +166,28 @@ const PlayerModal = forwardRef(function PlayerModal({
   // unavailable, not permanently broken. The first attempt still runs
   // synchronously inside the tap that triggered it; only failed retries
   // are delayed.
-  const attemptSwap = (playerObj, targetVideoId, attemptsLeft = 4) => {
+  const attemptSwap = (playerObj, targetVideoId, attemptsLeft = 4, resumeSeconds = attributes.currentTime) => {
     try {
-      playerObj.loadVideoById(targetVideoId);
       // Resume a previously-watched video's saved progress. This used to
       // be the opts.playerVars.start prop instead, but that has to stay
       // pinned at 0 on iOS now (see the opts comment below) so it can't be
-      // used for this -- seekTo() after loadVideoById() achieves the same
-      // resume behavior without touching that pinned prop.
-      if (targetVideoId !== DUMMY_VIDEO_ID && attributes.currentTime) {
-        playerObj.seekTo(Math.floor(attributes.currentTime), true);
+      // used for this. A separate seekTo() call right after loadVideoById()
+      // doesn't work either -- the YouTube widget can silently ignore a
+      // seek while the newly-loaded video is still in its initial
+      // unstarted/cueing state, which is exactly when this runs. Passing
+      // startSeconds as part of the loadVideoById() call itself is the
+      // supported way to start a freshly loaded video partway through.
+      // resumeSeconds defaults to the attributes prop for callers where
+      // that's already current (the sync-effect fallback and onReady's
+      // pending-request replay both run after modalData/attributes has
+      // been committed) -- playVideoRequest() instead passes it explicitly
+      // since it runs *before* that prop update lands.
+      const startSeconds = targetVideoId !== DUMMY_VIDEO_ID && resumeSeconds
+        ? Math.floor(resumeSeconds)
+        : undefined;
+      playerObj.loadVideoById({ videoId: targetVideoId, startSeconds });
+      if (startSeconds) {
+        pendingSeekSecondsRef.current = startSeconds;
       }
       playerObj.unMute();
       playerObj.playVideo();
@@ -189,7 +211,7 @@ const PlayerModal = forwardRef(function PlayerModal({
       if (attemptsLeft > 0) {
         retryTimeoutRef.current = setTimeout(() => {
           retryTimeoutRef.current = null;
-          attemptSwap(playerObj, targetVideoId, attemptsLeft - 1);
+          attemptSwap(playerObj, targetVideoId, attemptsLeft - 1, resumeSeconds);
         }, 150);
       } else {
         console.error("attemptSwap failed after retries:", error);
@@ -198,10 +220,14 @@ const PlayerModal = forwardRef(function PlayerModal({
   };
 
   useImperativeHandle(ref, () => ({
-    playVideoRequest: (requestedVideoId) => {
+    // resumeSeconds is optional and, when passed, takes priority over the
+    // attributes prop inside attemptSwap -- callers invoke this before
+    // updating the state that feeds that prop (see the comment at each
+    // call site), so the prop is still last render's value at this point.
+    playVideoRequest: (requestedVideoId, resumeSeconds) => {
       if (!isIOS) return false;
       if (player && currentVideoId !== requestedVideoId) {
-        attemptSwap(player, requestedVideoId);
+        attemptSwap(player, requestedVideoId, undefined, resumeSeconds);
         return true;
       }
       // Player not ready yet (e.g. tapped a card right after this page
@@ -210,6 +236,7 @@ const PlayerModal = forwardRef(function PlayerModal({
       // instead of silently dropping it and leaving the dummy playing.
       if (!player) {
         pendingVideoIdRef.current = requestedVideoId;
+        pendingVideoResumeSecondsRef.current = resumeSeconds;
         return true;
       }
       return false;
@@ -226,6 +253,8 @@ const PlayerModal = forwardRef(function PlayerModal({
         retryTimeoutRef.current = null;
       }
       pendingVideoIdRef.current = null;
+      pendingVideoResumeSecondsRef.current = undefined;
+      pendingSeekSecondsRef.current = null;
     };
   }, []);
 
@@ -264,8 +293,10 @@ const PlayerModal = forwardRef(function PlayerModal({
 
     if (pendingVideoIdRef.current) {
       const requestedVideoId = pendingVideoIdRef.current;
+      const resumeSeconds = pendingVideoResumeSecondsRef.current;
       pendingVideoIdRef.current = null;
-      attemptSwap(e.target, requestedVideoId);
+      pendingVideoResumeSecondsRef.current = undefined;
+      attemptSwap(e.target, requestedVideoId, undefined, resumeSeconds);
     }
   };
 
@@ -286,6 +317,23 @@ const PlayerModal = forwardRef(function PlayerModal({
         e.target.playVideo();
       } catch (error) {
         console.error("re-confirm unMute failed:", error);
+      }
+    }
+
+    // Same re-confirm idea for resuming a saved position: loadVideoById()'s
+    // own startSeconds can get silently dropped if it landed while the
+    // video was still unstarted/cueing. Unlike the unmute re-confirm above,
+    // a seekTo() fired as soon as BUFFERING (3) is reached still isn't
+    // reliable -- the media pipeline hasn't caught up yet at that point, so
+    // the position visibly lands for an instant and then snaps back to 0 as
+    // buffering continues. Only PLAYING (1) is actually safe to seek on.
+    if (pendingSeekSecondsRef.current !== null && (e.data === window.YT?.PlayerState?.PLAYING || e.data === 1)) {
+      const seconds = pendingSeekSecondsRef.current;
+      pendingSeekSecondsRef.current = null;
+      try {
+        e.target.seekTo(seconds, true);
+      } catch (error) {
+        console.error("re-confirm seekTo failed:", error);
       }
     }
   };

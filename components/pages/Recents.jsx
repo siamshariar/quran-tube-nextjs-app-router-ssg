@@ -74,7 +74,11 @@ const Recents = () => {
     // player's unMute()/playVideo() runs inside a real, direct user
     // gesture, which is what iOS Safari actually honors for turning sound
     // on. See PlayerModal's playVideoRequest for the swap itself.
-    playerModalRef.current?.playVideoRequest(ytVideoId);
+    // Passes currentTime explicitly rather than relying on PlayerModal's
+    // own attributes prop, which is still last render's value at this
+    // point -- setModalData just below is what will update it, but that
+    // hasn't happened yet.
+    playerModalRef.current?.playVideoRequest(ytVideoId, attributes?.currentTime);
 
     setModalData({
       open: true,
