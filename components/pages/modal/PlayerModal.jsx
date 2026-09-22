@@ -63,11 +63,11 @@ const PlayerModal = forwardRef(function PlayerModal({
   // already in flight from the original tap.
   const pendingUnmuteRef = useRef(false);
   // Same idea as pendingUnmuteRef, but for resuming a previously-watched
-  // video's saved position: loadVideoById({ startSeconds }) can silently
-  // ignore that startSeconds while the video is still in its initial
-  // unstarted/cueing state (right when attemptSwap runs, inside the tap).
-  // Holds the target second to seek to once onStateChange sees the video
-  // actually reach a loaded state; cleared once applied.
+  // video's saved position: a freshly loaded video always starts at 0 (see
+  // attemptSwap -- startSeconds is deliberately not passed to
+  // loadVideoById() there anymore), so the resume seek always has to land
+  // after the fact, once onStateChange sees the video actually reach a
+  // loaded state. Holds the target second to seek to; cleared once applied.
   const pendingSeekSecondsRef = useRef(null);
   // Backs up the onStateChange re-confirm above: real iOS devices (not
   // reproduced on desktop WebKit) have been seen re-entering
@@ -177,14 +177,18 @@ const PlayerModal = forwardRef(function PlayerModal({
   const attemptSwap = (playerObj, targetVideoId, attemptsLeft = 4, resumeSeconds = attributes.currentTime) => {
     try {
       // Resume a previously-watched video's saved progress. This used to
-      // be the opts.playerVars.start prop instead, but that has to stay
-      // pinned at 0 on iOS now (see the opts comment below) so it can't be
-      // used for this. A separate seekTo() call right after loadVideoById()
-      // doesn't work either -- the YouTube widget can silently ignore a
-      // seek while the newly-loaded video is still in its initial
-      // unstarted/cueing state, which is exactly when this runs. Passing
-      // startSeconds as part of the loadVideoById() call itself is the
-      // supported way to start a freshly loaded video partway through.
+      // be passed as loadVideoById()'s own startSeconds option, but on real
+      // iOS devices that quietly breaks the synchronous user-gesture chain
+      // unMute()/playVideo() right below depend on -- with startSeconds
+      // present, iOS stopped treating those calls as still inside the tap,
+      // so the swap-in-place video stayed muted/paused and the
+      // already-playing muted dummy just kept going, looking like nothing
+      // had happened. loadVideoById() is now always called with just the
+      // videoId (matching the no-resume path used on Favorites/ContentPage,
+      // which never had this problem) so the gesture chain stays intact;
+      // the resume position is instead applied by the seekTo() re-confirm/
+      // watchdog below, which already exists to handle a dropped seek and
+      // runs asynchronously regardless of the gesture.
       // resumeSeconds defaults to the attributes prop for callers where
       // that's already current (the sync-effect fallback and onReady's
       // pending-request replay both run after modalData/attributes has
@@ -193,7 +197,7 @@ const PlayerModal = forwardRef(function PlayerModal({
       const startSeconds = targetVideoId !== DUMMY_VIDEO_ID && resumeSeconds
         ? Math.floor(resumeSeconds)
         : undefined;
-      playerObj.loadVideoById({ videoId: targetVideoId, startSeconds });
+      playerObj.loadVideoById({ videoId: targetVideoId });
       if (startSeconds) {
         pendingSeekSecondsRef.current = startSeconds;
         if (seekWatchdogRef.current) {
