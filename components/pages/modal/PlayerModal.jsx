@@ -159,6 +159,22 @@ const PlayerModal = forwardRef(function PlayerModal({
     window.dispatchEvent(new CustomEvent('favoritesUpdated', { detail: { videoId: videoId || attributes.ytVideoId } }));
   };
 
+  // Turns sound on and clears the pending-unmute flag. Pulled out so both
+  // attemptSwap (the immediate, no-resume-position case, still inside the
+  // tap gesture) and the async re-confirms below (BUFFERING/CUED/PLAYING
+  // events, and the seek watchdog once a pending seek lands) share one
+  // place that does this -- unMute() doesn't need a fresh gesture here,
+  // it's re-confirming the one already granted by the original tap.
+  const confirmUnmute = (playerObj) => {
+    pendingUnmuteRef.current = false;
+    try {
+      playerObj.unMute();
+      playerObj.playVideo();
+    } catch (error) {
+      console.error("confirmUnmute failed:", error);
+    }
+  };
+
   // Exposed to ContentPage so it can call this *directly inside* a video
   // card's own onClick handler -- that's the one place a call to
   // loadVideoById()/unMute()/playVideo() runs synchronously inside a real
@@ -203,12 +219,30 @@ const PlayerModal = forwardRef(function PlayerModal({
         if (seekWatchdogRef.current) {
           clearInterval(seekWatchdogRef.current);
         }
-        let checksLeft = 20; // ~10s at 500ms, generous for a slow real-device load
+        // Polls every 150ms rather than 500ms -- this seek is what the
+        // player has to stay muted for (see confirmUnmute below), so a
+        // tighter poll shortens that muted-loading window on top of just
+        // being a backup for a dropped seek. Same ~10s overall ceiling.
+        let checksLeft = 67;
         seekWatchdogRef.current = setInterval(() => {
           checksLeft -= 1;
-          if (pendingSeekSecondsRef.current === null || checksLeft <= 0) {
+          if (pendingSeekSecondsRef.current === null) {
             clearInterval(seekWatchdogRef.current);
             seekWatchdogRef.current = null;
+            return;
+          }
+          if (checksLeft <= 0) {
+            // Gave up confirming the seek landed -- don't leave the video
+            // silently muted forever over this; unmute anyway so playback
+            // is at least audible (possibly still from an unconfirmed
+            // position), matching what would happen if there had been no
+            // resume position to seek to at all.
+            pendingSeekSecondsRef.current = null;
+            clearInterval(seekWatchdogRef.current);
+            seekWatchdogRef.current = null;
+            if (pendingUnmuteRef.current) {
+              confirmUnmute(playerObj);
+            }
             return;
           }
           try {
@@ -217,27 +251,36 @@ const PlayerModal = forwardRef(function PlayerModal({
               pendingSeekSecondsRef.current = null;
               clearInterval(seekWatchdogRef.current);
               seekWatchdogRef.current = null;
-            } else if (playerObj.getPlayerState && playerObj.getPlayerState() === 1) {
-              // Only re-seek while actually playing -- same reasoning as
-              // the onStateChange re-confirm: seeking during
-              // buffering/unstarted gets silently dropped.
+              confirmUnmute(playerObj);
+            } else {
+              // Try the seek as soon as there's a player state at all
+              // (buffering/cued included), not just once PLAYING is
+              // reached -- worst case it's silently dropped and the
+              // PLAYING-only re-confirm in onStateChange (or the next tick
+              // of this same watchdog) catches it, but landing it a beat
+              // earlier is what keeps the video muted-and-loading window
+              // as short as possible instead of waiting out a full
+              // watchdog tick at the wrong position.
               playerObj.seekTo(pendingSeekSecondsRef.current, true);
             }
           } catch (error) {
             clearInterval(seekWatchdogRef.current);
             seekWatchdogRef.current = null;
           }
-        }, 500);
+        }, 150);
       }
-      playerObj.unMute();
+      // Stay muted while a resume seek is still pending -- unmuting before
+      // the seek lands means a moment of the wrong part of the video (from
+      // 0) is audible before it jumps to the saved position. confirmUnmute
+      // (below) is what actually turns sound on, either immediately here
+      // (no resume position to wait for) or once the seek is confirmed.
+      if (startSeconds) {
+        playerObj.mute();
+        pendingUnmuteRef.current = true;
+      } else {
+        confirmUnmute(playerObj);
+      }
       playerObj.playVideo();
-      // loadVideoById() starts an async load -- the unMute() above can
-      // land before that finishes and get reset back to muted once it
-      // does. Mark that an unmute is in flight so onStateChange can
-      // re-apply it once the new video actually starts
-      // buffering/playing; this doesn't need a fresh gesture, it's
-      // just re-confirming the one already granted by this tap.
-      pendingUnmuteRef.current = true;
       // Record the swap in state so the videoId-sync effect below sees
       // currentVideoId === videoId and skips its own fallback
       // loadVideoById() call -- without this, that effect keeps re-firing
@@ -354,14 +397,17 @@ const PlayerModal = forwardRef(function PlayerModal({
     // starts loading, re-apply unMute() -- if the first call (right after
     // loadVideoById()) landed before the new video finished loading, the
     // player can silently reset back to muted once it does.
-    if (pendingUnmuteRef.current && (e.data === window.YT?.PlayerState?.PLAYING || e.data === 1 || e.data === 3 || e.data === 5)) {
-      pendingUnmuteRef.current = false;
-      try {
-        e.target.unMute();
-        e.target.playVideo();
-      } catch (error) {
-        console.error("re-confirm unMute failed:", error);
-      }
+    // Skipped while a resume seek is still pending -- unmuting before that
+    // seek actually lands would be audible from position 0, a beat of the
+    // wrong part of the video, before it jumps to the saved position. The
+    // seek re-confirm block below is what unmutes in that case, right as
+    // it confirms the seek landed.
+    if (
+      pendingUnmuteRef.current &&
+      pendingSeekSecondsRef.current === null &&
+      (e.data === window.YT?.PlayerState?.PLAYING || e.data === 1 || e.data === 3 || e.data === 5)
+    ) {
+      confirmUnmute(e.target);
     }
 
     // Same re-confirm idea for resuming a saved position: loadVideoById()'s
@@ -376,13 +422,17 @@ const PlayerModal = forwardRef(function PlayerModal({
     // after that first PLAYING, dropping the seek again. So this doesn't
     // consume the pending seek on first use -- it keeps re-applying it on
     // every PLAYING until getCurrentTime() actually confirms we're at (or
-    // past) the target, then stops.
+    // past) the target, then stops -- and unmutes right there, since that's
+    // the earliest point sound is actually at the right position.
     if (pendingSeekSecondsRef.current !== null && (e.data === window.YT?.PlayerState?.PLAYING || e.data === 1)) {
       const seconds = pendingSeekSecondsRef.current;
       try {
         const current = e.target.getCurrentTime ? e.target.getCurrentTime() : 0;
         if (current >= seconds - 1) {
           pendingSeekSecondsRef.current = null;
+          if (pendingUnmuteRef.current) {
+            confirmUnmute(e.target);
+          }
         } else {
           e.target.seekTo(seconds, true);
         }
