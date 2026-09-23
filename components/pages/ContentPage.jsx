@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { server, constants } from "../../lib/config";
+import { isIOSDevice } from "../../lib/device";
 import PlayerModal from "./modal/PlayerModal";
 import Meta from "../core/Meta";
 import ChipBar from "../ui/ChipBar";
@@ -69,7 +70,7 @@ export default function ContentPage({ getUrl, defaultMetaTitle, metaDescription,
     const [isFirstLoad, setIsFirstLoad] = useState(true);
     const initLocales = localizationData.data;
     const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
-    const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isIOS = isIOSDevice();
     const [toDateParam, setToDateParam] = useState(null);
     const [fromDateParam, setFromDateParam] = useState(null);
     const virtuosoRef = useRef(null);
