@@ -18,9 +18,36 @@ export const RecentVideosStore = new Store({
 // RecentVideosStore state under `mutate` (already caught up from the
 // previous queued write) rather than a fresh getItem(), makes the whole
 // sequence apply in order with nothing lost.
+//
+// That in-memory state has to actually reflect what's in storage before any
+// mutation runs, though -- Recents.jsx hydrates it via loadRecentVideos() on
+// mount, but Favorites/ContentPage call addRecentVideo()/moveVideoToTop()
+// directly without ever visiting Recents first in that session. Without
+// this, RecentVideosStore.getRawState().recentVideos would still be its
+// initial [], and the very first mutation from one of those pages would
+// write that near-empty list straight over whatever was actually persisted,
+// wiping out the real history. ensureHydrated() makes every mutation load
+// the persisted list into memory first (once per session, memoized so
+// repeated calls don't refetch), regardless of which page triggers it.
+let hydrated = null;
+const ensureHydrated = () => {
+  if (!hydrated) {
+    hydrated = storage.getItem("recents").then((storedVideos) => {
+      RecentVideosStore.update((s) => {
+        s.recentVideos = storedVideos || [];
+      });
+    }).catch((error) => {
+      console.error("Error loading videos from storage", error);
+      hydrated = null; // allow a retry on the next mutation
+    });
+  }
+  return hydrated;
+};
+
 let writeQueue = Promise.resolve();
 const enqueue = (mutate) => {
   const result = writeQueue.then(async () => {
+    await ensureHydrated();
     const current = RecentVideosStore.getRawState().recentVideos || [];
     const updated = await mutate(current);
     RecentVideosStore.update((s) => {
@@ -38,11 +65,7 @@ const enqueue = (mutate) => {
 
 export const loadRecentVideos = async () => {
   try {
-    const storedVideos = await storage.getItem("recents");
-    const recentVideos = storedVideos || [];
-    RecentVideosStore.update((s) => {
-      s.recentVideos = recentVideos;
-    });
+    await ensureHydrated();
   } catch (error) {
     console.error("Error loading videos from storage", error);
   }
