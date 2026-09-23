@@ -38,6 +38,7 @@ import {
 
 import MenuClickModal from "../pages/modal/MenuClickModal";
 import {informationCircleOutline} from "ionicons/icons";
+import { isIOSDevice } from "../../lib/device";
 
 const pages1 = [
   {
@@ -124,7 +125,7 @@ const pages2 = [
 ];
 
 const More = () => {
-  const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isIOS = isIOSDevice();
   const [modalOpen, setModalOpen] = useState(false);
   const handleModalClose = () => {
     setModalOpen(false);

@@ -6,6 +6,7 @@ import PlayerModal from "./modal/PlayerModal";
 import Meta from "../core/Meta";
 import styles from "./Recents.module.css";
 import { server } from "../../lib/config";
+import { isIOSDevice } from "../../lib/device";
 import { RecentVideosStore, loadRecentVideos, removeRecentVideo, moveVideoToTop } from "../../store/RecentVideosStore";
 import { useStoreState } from "pullstate";
 
@@ -26,7 +27,7 @@ const Recents = () => {
     fullUrl: null,
   });
   const [isVideosLoaded, setIsVideosLoaded] = useState(false);
-  const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isIOS = isIOSDevice();
   const playerModalRef = useRef(null);
 
   useEffect(() => {

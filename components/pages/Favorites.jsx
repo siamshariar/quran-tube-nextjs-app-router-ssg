@@ -6,6 +6,7 @@ import styles from "./Favorites.module.css";
 import Meta from "../core/Meta";
 import PlayerModal from "./modal/PlayerModal";
 import { server } from "../../lib/config";
+import { isIOSDevice } from "../../lib/device";
 import Loader from "../utils/Loader";
 import { FavoriteVideosStore, loadFavoriteVideos, removeFavoriteVideo } from "../../store/FavoriteVideosStore";
 import { addRecentVideo, moveVideoToTop } from "../../store/RecentVideosStore";
@@ -16,7 +17,7 @@ const Favorites = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const ref = useRef();
   const playerModalRef = useRef(null);
-  const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isIOS = isIOSDevice();
   const [isLoadingMore, setIsloadingMore] = useState(true);
   const [filteredFavorites, setFilteredFavorites] = useState([]);
   const [modalData, setModalData] = useState({
