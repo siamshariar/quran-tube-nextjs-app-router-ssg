@@ -41,6 +41,17 @@ a {
   user-select: none;           /* Fallback for modern browsers */
 }
 
+/* No zoom: the app must feel native when installed to the home screen.
+   `user-scalable=no` in the viewport is not enough on its own -- iOS Safari
+   has ignored it since iOS 10 -- so `touch-action` does the real work here.
+   `pan-x pan-y` keeps scrolling and swiping but removes pinch-zoom and
+   double-tap-zoom. `text-size-adjust` stops iOS inflating text on rotate. */
+html {
+  touch-action: pan-x pan-y;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 @media screen and (min-width: 1024px) {
   .scroll_up .header,
   .scroll_down .header {
