@@ -7,6 +7,7 @@ import { IonApp, IonSplitPane } from "@ionic/react";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import Layout from "./Layout";
 import { loadFavoriteVideos } from "../../store/FavoriteVideosStore";
+import useDisableZoom from "../../hooks/useDisableZoom";
 
 if (typeof window !== "undefined") {
   window
@@ -23,6 +24,9 @@ if (typeof window !== "undefined") {
 const AppShell = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
+
+  // Keep the app non-zoomable (pinch / double-tap), like a native app.
+  useDisableZoom();
 
   useEffect(() => {
     loadFavoriteVideos();

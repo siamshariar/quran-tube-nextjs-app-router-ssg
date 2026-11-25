@@ -47,9 +47,24 @@ export const metadata = {
   },
 };
 
+// The app is installed to the home screen as a PWA and must behave like a
+// native app: no pinch-zoom, no double-tap-zoom, no accidental zoom that the
+// user then can't reset (there's no browser chrome to reset it from).
+//
+// `maximumScale: 1` + `userScalable: false` is what the app shipped with
+// before the App Router migration; the migration dropped it, which is what
+// re-enabled zooming on the home-screen app. Keep it here, in the server-
+// rendered viewport export, so it applies on first paint -- a client-side
+// meta tag (react-helmet) races the first render and iOS may have already
+// locked in the parsed viewport by then.
+//
+// Matches Quran.radio, which keeps the same directives.
 export const viewport = {
   width: "device-width",
   initialScale: 1,
+  minimumScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
 };
 
